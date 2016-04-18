@@ -25,7 +25,7 @@ public class UserControlInput : MonoBehaviour
         m_jump = Input.GetKey(KeyCode.Space);
         m_crouch = Input.GetKey(KeyCode.C);
         m_walk = Input.GetKey(KeyCode.LeftControl);
-        m_sprint = Input.GetKey(KeyCode.RightControl);        
+        m_sprint = Input.GetKey(KeyCode.LeftShift);        
 	}
 
     void FixedUpdate ()

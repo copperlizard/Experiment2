@@ -6,7 +6,7 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerAnimationController : MonoBehaviour
 {
-    public float m_animSpeedMultiplier = 1.0f, m_MoveSpeedMultiplier = 1.0f, m_runCycleLegOffset = 0.2f;
+    public float m_animSpeedMultiplier = 1.0f, m_MoveSpeedMultiplier = 1.0f, m_runCycleLegOffset = 0.2f, m_stationaryTurnSpeed = 180.0f, m_movingTurnSpeed = 360.0f;
 
     private PlayerStateController m_playerStateController;
 
@@ -24,16 +24,21 @@ public class PlayerAnimationController : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update ()
-    {
+    {   
         UpdateAnimator();
 	}
 
     void UpdateAnimator()
-    {
+    {        
+        float turn = m_playerStateController.m_turnTarAng - transform.rotation.eulerAngles.y;                
+        turn /= 360.0f;
+
+        RotatePlayer(turn);
+
         // update the animator parameters
         m_animator.SetFloat("Forward", m_playerStateController.m_forwardAmount, 0.1f, Time.deltaTime);
         m_animator.SetFloat("Sideways", m_playerStateController.m_sidewaysAmount, 0.1f, Time.deltaTime);
-        m_animator.SetFloat("Turn", m_playerStateController.m_turnTarAng - transform.rotation.eulerAngles.y, 0.1f, Time.deltaTime);
+        m_animator.SetFloat("Turn", turn, 0.1f, Time.deltaTime);
         m_animator.SetBool("Crouch", m_playerStateController.m_crouch);
         m_animator.SetBool("OnGround", m_playerStateController.m_grounded);
         if (!m_playerStateController.m_grounded)
@@ -72,18 +77,24 @@ public class PlayerAnimationController : MonoBehaviour
         {
             Vector3 v = (m_animator.deltaPosition * m_MoveSpeedMultiplier) / Time.deltaTime;
 
-            transform.rotation = transform.rotation * m_animator.deltaRotation;
+            //transform.rotation = transform.rotation * m_animator.deltaRotation;
 
             // we preserve the existing y part of the current velocity.
             v.y = m_rb.velocity.y;
             m_rb.velocity = v;
-
-            
         }
-    }    
+    }
+
+    void ApplyExtraTurnRotation()
+    {
+        // help the character turn faster (this is in addition to root rotation in the animation)
+        float turnSpeed = Mathf.Lerp(m_stationaryTurnSpeed, m_movingTurnSpeed, m_playerStateController.m_forwardAmount);
+        transform.Rotate(0, (m_playerStateController.m_turnTarAng - transform.rotation.eulerAngles.y) * turnSpeed * Time.deltaTime, 0);
+    }
 
     void RotatePlayer(float ang) 
     {
-        transform.Rotate(0.0f, ang - transform.rotation.eulerAngles.y, 0.0f);
+        float turnSpeed = Mathf.Lerp(m_stationaryTurnSpeed, m_movingTurnSpeed, m_playerStateController.m_forwardAmount);
+        transform.Rotate(0, ang * turnSpeed * Time.deltaTime, 0);
     }
 }

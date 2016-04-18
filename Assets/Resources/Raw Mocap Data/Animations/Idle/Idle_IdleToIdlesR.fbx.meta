@@ -217,10 +217,10 @@ ModelImporter:
     - serializedVersion: 16
       name: IdleQuarterTurnRight
       takeName: _97_TO_100_a_U1_M_P_idle_NeutralTO45IdleTONeutralIdle__Fb_p45_No_0_PJ_2
-      firstFrame: 280
-      lastFrame: 323
+      firstFrame: 284
+      lastFrame: 315
       wrapMode: 0
-      orientationOffsetY: -3
+      orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
@@ -228,7 +228,7 @@ ModelImporter:
       loopTime: 1
       loopBlend: 1
       loopBlendOrientation: 0
-      loopBlendPositionY: 0
+      loopBlendPositionY: 1
       loopBlendPositionXZ: 0
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
@@ -399,8 +399,8 @@ ModelImporter:
     - serializedVersion: 16
       name: IdleHalfTurnRight
       takeName: _97_TO_100_a_U1_M_P_idle_NeutralTO45IdleTONeutralIdle__Fb_p45_No_0_PJ_2
-      firstFrame: 625
-      lastFrame: 681
+      firstFrame: 622
+      lastFrame: 659
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -410,7 +410,7 @@ ModelImporter:
       loopTime: 1
       loopBlend: 1
       loopBlendOrientation: 0
-      loopBlendPositionY: 0
+      loopBlendPositionY: 1
       loopBlendPositionXZ: 0
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
@@ -581,10 +581,10 @@ ModelImporter:
     - serializedVersion: 16
       name: IdleQuarterTurnLeft
       takeName: _97_TO_100_a_U1_M_P_idle_NeutralTO45IdleTONeutralIdle__Fb_p45_No_0_PJ_2
-      firstFrame: 280
-      lastFrame: 323
+      firstFrame: 284
+      lastFrame: 315
       wrapMode: 0
-      orientationOffsetY: -3
+      orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
@@ -592,7 +592,7 @@ ModelImporter:
       loopTime: 1
       loopBlend: 1
       loopBlendOrientation: 0
-      loopBlendPositionY: 0
+      loopBlendPositionY: 1
       loopBlendPositionXZ: 0
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
@@ -763,8 +763,8 @@ ModelImporter:
     - serializedVersion: 16
       name: IdleHalfTurnLeft
       takeName: _97_TO_100_a_U1_M_P_idle_NeutralTO45IdleTONeutralIdle__Fb_p45_No_0_PJ_2
-      firstFrame: 625
-      lastFrame: 681
+      firstFrame: 622
+      lastFrame: 659
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -774,7 +774,7 @@ ModelImporter:
       loopTime: 1
       loopBlend: 1
       loopBlendOrientation: 0
-      loopBlendPositionY: 0
+      loopBlendPositionY: 1
       loopBlendPositionXZ: 0
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1

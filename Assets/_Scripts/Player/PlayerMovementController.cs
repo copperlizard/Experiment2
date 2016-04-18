@@ -6,7 +6,7 @@ using System.Collections;
 public class PlayerMovementController : MonoBehaviour
 {
     public GameObject m_cam;
-    public float m_moveSpeed = 5.0f, m_crouchSpeedModifier = 0.5f, m_walkSpeedModifier = 0.5f, m_sprintSpeedModifier = 1.5f, m_maxTurnSpeed = 5.0f, 
+    public float m_crouchSpeedModifier = 0.5f, m_walkSpeedModifier = 0.5f, m_sprintSpeedModifier = 1.5f, 
         m_groundCheckDist = 0.1f, m_headCheckGroundOffset = 0.1f, m_headCheckDist;
     
     private PlayerStateController m_stateController;
@@ -46,7 +46,7 @@ public class PlayerMovementController : MonoBehaviour
         m_stateController.m_crouch = crouch;
         m_stateController.m_walk = walk && !crouch && !sprint; //crouching and or sprint cancels walk
         m_stateController.m_sprint = sprint && !fire2 && !crouch; //aiming and/or crouching cancels sprint
-
+        
         //Check for head room
         HeadCheck();
 
@@ -116,10 +116,7 @@ public class PlayerMovementController : MonoBehaviour
             else if (m_stateController.m_walk)
             {
                 m_move *= m_walkSpeedModifier;
-            }
-
-            // Set move speed
-            m_move *= m_moveSpeed;
+            }            
 
             // Account for "hills"
             m_move = Vector3.ProjectOnPlane(m_move, m_groundNormal);
@@ -166,10 +163,7 @@ public class PlayerMovementController : MonoBehaviour
         {
             m_move *= m_walkSpeedModifier;
         }
-
-        // Set move speed
-        m_move *= m_moveSpeed;
-
+        
         // Account for "hills"
         m_move = Vector3.ProjectOnPlane(m_move, m_groundNormal);
 
