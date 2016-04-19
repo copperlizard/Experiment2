@@ -121,6 +121,11 @@ public class PlayerMovementController : MonoBehaviour
             // Account for "hills"
             m_move = Vector3.ProjectOnPlane(m_move, m_groundNormal);
         }
+        else
+        {
+            //Stop rotating
+            m_stateController.m_turnTarAng = transform.rotation.eulerAngles.y;
+        }
 
         m_stateController.m_forwardAmount = m_move.magnitude;
         m_stateController.m_sidewaysAmount = 0.0f;

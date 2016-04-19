@@ -24,7 +24,7 @@ public class UserControlInput : MonoBehaviour
         m_fire2 = Input.GetMouseButton(1);
         m_jump = Input.GetKey(KeyCode.Space);
         m_crouch = Input.GetKey(KeyCode.C);
-        m_walk = Input.GetKey(KeyCode.LeftControl);
+        m_walk = Input.GetKey(KeyCode.Z);
         m_sprint = Input.GetKey(KeyCode.LeftShift);        
 	}
 

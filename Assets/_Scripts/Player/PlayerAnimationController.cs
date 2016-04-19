@@ -29,8 +29,25 @@ public class PlayerAnimationController : MonoBehaviour
 	}
 
     void UpdateAnimator()
-    {        
-        float turn = m_playerStateController.m_turnTarAng - transform.rotation.eulerAngles.y;                
+    {
+        //float turnA = m_playerStateController.m_turnTarAng - transform.rotation.eulerAngles.y;
+        //float turnB = (m_playerStateController.m_turnTarAng + 360.0f) - transform.rotation.eulerAngles.y;
+        //float turn = Mathf.Min(Mathf.Abs(turnA), Mathf.Abs(turnB));
+
+        float turn = m_playerStateController.m_turnTarAng - transform.rotation.eulerAngles.y;
+
+        if (Mathf.Abs(turn) > 180.0f)
+        {
+            if (transform.rotation.eulerAngles.y < m_playerStateController.m_turnTarAng)
+            {
+                turn = m_playerStateController.m_turnTarAng - (transform.rotation.eulerAngles.y + 360.0f);
+            }
+            else
+            {
+                turn = (m_playerStateController.m_turnTarAng + 360.0f) - transform.rotation.eulerAngles.y;
+            }
+        }
+
         turn /= 360.0f;
 
         RotatePlayer(turn);

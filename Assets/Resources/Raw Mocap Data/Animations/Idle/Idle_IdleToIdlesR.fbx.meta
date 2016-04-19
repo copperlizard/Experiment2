@@ -213,7 +213,7 @@ ModelImporter:
       transformMask: []
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+      additiveReferencePoseFrame: 75
     - serializedVersion: 16
       name: IdleQuarterTurnRight
       takeName: _97_TO_100_a_U1_M_P_idle_NeutralTO45IdleTONeutralIdle__Fb_p45_No_0_PJ_2
@@ -586,7 +586,7 @@ ModelImporter:
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
-      cycleOffset: 0
+      cycleOffset: 0.5
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
@@ -768,7 +768,7 @@ ModelImporter:
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
-      cycleOffset: 0
+      cycleOffset: 0.5
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
