@@ -6,7 +6,7 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerAnimationController : MonoBehaviour
 {
-    public float m_animSpeedMultiplier = 1.0f, m_MoveSpeedMultiplier = 1.0f, m_runCycleLegOffset = 0.2f, m_stationaryTurnSpeed = 180.0f, m_movingTurnSpeed = 360.0f;
+    public float m_jumpForce = 1.0f, m_animSpeedMultiplier = 1.0f, m_MoveSpeedMultiplier = 1.0f, m_runCycleLegOffset = 0.2f, m_stationaryTurnSpeed = 180.0f, m_movingTurnSpeed = 360.0f;
 
     private PlayerStateController m_playerStateController;
 
@@ -47,10 +47,11 @@ public class PlayerAnimationController : MonoBehaviour
                 turn = (m_playerStateController.m_turnTarAng + 360.0f) - transform.rotation.eulerAngles.y;
             }
         }
-
-        turn /= 360.0f;
+        turn /= 180.0f;
 
         RotatePlayer(turn);
+
+        JumpPlayer();
 
         // update the animator parameters
         m_animator.SetFloat("Forward", m_playerStateController.m_forwardAmount, 0.1f, Time.deltaTime);
@@ -101,17 +102,20 @@ public class PlayerAnimationController : MonoBehaviour
             m_rb.velocity = v;
         }
     }
-
-    void ApplyExtraTurnRotation()
-    {
-        // help the character turn faster (this is in addition to root rotation in the animation)
-        float turnSpeed = Mathf.Lerp(m_stationaryTurnSpeed, m_movingTurnSpeed, m_playerStateController.m_forwardAmount);
-        transform.Rotate(0, (m_playerStateController.m_turnTarAng - transform.rotation.eulerAngles.y) * turnSpeed * Time.deltaTime, 0);
-    }
-
+    
     void RotatePlayer(float ang) 
     {
         float turnSpeed = Mathf.Lerp(m_stationaryTurnSpeed, m_movingTurnSpeed, m_playerStateController.m_forwardAmount);
         transform.Rotate(0, ang * turnSpeed * Time.deltaTime, 0);
+    }
+
+    void JumpPlayer()
+    {
+        if (m_playerStateController.m_jump && m_playerStateController.m_grounded)
+        {
+            m_playerStateController.m_grounded = false;
+            m_playerStateController.m_jump = false;
+            m_rb.AddForce(Vector3.up * m_jumpForce, ForceMode.VelocityChange);
+        }
     }
 }

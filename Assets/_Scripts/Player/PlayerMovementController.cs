@@ -6,7 +6,7 @@ using System.Collections;
 public class PlayerMovementController : MonoBehaviour
 {
     public GameObject m_cam;
-    public float m_crouchSpeedModifier = 0.5f, m_walkSpeedModifier = 0.5f, m_sprintSpeedModifier = 1.5f, 
+    public float m_crouchSpeedModifier = 0.5f, m_walkSpeedModifier = 0.5f, m_sprintSpeedModifier = 2.0f, 
         m_groundCheckDist = 0.1f, m_headCheckGroundOffset = 0.1f, m_headCheckDist;
     
     private PlayerStateController m_stateController;
