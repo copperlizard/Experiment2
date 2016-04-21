@@ -54,15 +54,22 @@ public class PlayerAnimationController : MonoBehaviour
         JumpPlayer();
 
         // update the animator parameters
+        m_animator.SetLayerWeight(1, (m_playerStateController.m_aiming) ? 1.0f : 0.0f); //set aiming layer weight
         m_animator.SetFloat("Forward", m_playerStateController.m_forwardAmount, 0.1f, Time.deltaTime);
         m_animator.SetFloat("Sideways", m_playerStateController.m_sidewaysAmount, 0.1f, Time.deltaTime);
         m_animator.SetFloat("Turn", turn, 0.1f, Time.deltaTime);
-        m_animator.SetBool("Crouch", m_playerStateController.m_crouch);
         m_animator.SetBool("OnGround", m_playerStateController.m_grounded);
+        m_animator.SetBool("Crouch", m_playerStateController.m_crouch);
+        m_animator.SetBool("Slide", m_playerStateController.m_slide);
+
         if (!m_playerStateController.m_grounded)
         {
             m_animator.SetFloat("Jump", m_rb.velocity.y);
         }
+
+        // check if sliding
+        AnimatorStateInfo curAnimState = m_animator.GetCurrentAnimatorStateInfo(0);
+        bool isSliding = curAnimState.IsName("Sliding");
 
         // calculate which leg is behind, so as to leave that leg trailing in the jump animation
         // (This code is reliant on the specific run cycle offset in our animations,
@@ -71,7 +78,7 @@ public class PlayerAnimationController : MonoBehaviour
             Mathf.Repeat(
                 m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime + m_runCycleLegOffset, 1);
         float jumpLeg = (runCycle < 0.5f ? 1 : -1) * m_playerStateController.m_forwardAmount;
-        if (m_playerStateController.m_grounded)
+        if (m_playerStateController.m_grounded && !isSliding)
         {
             m_animator.SetFloat("JumpLeg", jumpLeg);
         }

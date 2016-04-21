@@ -39,15 +39,18 @@ public class PlayerMovementController : MonoBehaviour
     
     public void Move (float v, float h, bool fire1, bool fire2, bool jump, bool crouch, bool walk, bool sprint)
     {
-        // update player state info        
+        // Update player state info        
         m_stateController.m_grounded = CheckGround();
         m_stateController.m_aiming = fire2;
         m_stateController.m_jump = jump && !crouch;
         m_stateController.m_crouch = crouch;
         m_stateController.m_walk = walk && !crouch && !sprint; //crouching and or sprint cancels walk
         m_stateController.m_sprint = sprint && !fire2 && !crouch; //aiming and/or crouching cancels sprint
+
+        // Check if sliding
+        m_stateController.m_slide = (m_stateController.m_move.magnitude > 1.0f) && crouch;
         
-        //Check for head room
+        // Check for head room
         HeadCheck();
 
         if (fire2)
