@@ -6,14 +6,14 @@ using System.Collections;
 public class PlayerMovementController : MonoBehaviour
 {
     public GameObject m_cam;
-    public float m_crouchSpeedModifier = 0.5f, m_walkSpeedModifier = 0.5f, m_sprintSpeedModifier = 2.0f, 
-        m_groundCheckDist = 0.1f, m_headCheckGroundOffset = 0.1f, m_headCheckDist;
+    public float m_groundCheckDist = 0.1f, m_headCheckGroundOffset = 0.1f, m_headCheckDist;
     
     private PlayerStateController m_stateController;
-    private Vector3 m_move, m_groundNormal;        
+    private Vector3 m_move, m_groundNormal;
+    private float m_walkInputModifier = 0.5f, m_sprintInputModifier = 2.0f;
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start ()
     {   
         m_stateController = GetComponent<PlayerStateController>();
 
@@ -98,6 +98,16 @@ public class PlayerMovementController : MonoBehaviour
         m_move = new Vector3(h, 0.0f, v);
         m_move.Normalize();
 
+        // Apply move speed modifier
+        if (m_stateController.m_sprint)
+        {
+            m_move *= m_sprintInputModifier;
+        }
+        else if (m_stateController.m_walk)
+        {
+            m_move *= m_walkInputModifier;
+        }
+
         if (m_move.magnitude > 0.0f)
         {
             // Rotate input to match camera
@@ -106,20 +116,6 @@ public class PlayerMovementController : MonoBehaviour
             // Look "forward"
             Quaternion lookRot = Quaternion.LookRotation(m_move);            
             m_stateController.m_turnTarAng = lookRot.eulerAngles.y;
-
-            // Apply move speed modifier
-            if (m_stateController.m_crouch)
-            {
-                m_move *= m_crouchSpeedModifier;
-            }
-            else if (m_stateController.m_sprint)
-            {
-                m_move *= m_sprintSpeedModifier;
-            }
-            else if (m_stateController.m_walk)
-            {
-                m_move *= m_walkSpeedModifier;
-            }            
 
             // Account for "hills"
             m_move = Vector3.ProjectOnPlane(m_move, m_groundNormal);
@@ -142,18 +138,14 @@ public class PlayerMovementController : MonoBehaviour
             m_move = Vector3.zero;
             return;
         }
-
-        // Not aiming
+        
         m_move = new Vector3(h, 0.0f, v);
         m_move.Normalize();
 
-        if (m_stateController.m_sprint)
+        // Apply move input modifier             
+        if (m_stateController.m_walk)
         {
-            m_move *= 2.0f;
-        }
-        else if (m_stateController.m_walk)
-        {
-            m_move *= 0.5f;
+            m_move *= m_walkInputModifier;
         }
 
         // Rotate input to match camera
@@ -161,20 +153,9 @@ public class PlayerMovementController : MonoBehaviour
 
         // Rotate player to match input        
         m_stateController.m_turnTarAng = m_cam.transform.eulerAngles.y;
-
-        // Apply move speed modifier
-        if (m_stateController.m_crouch)
-        {
-            m_move *= m_crouchSpeedModifier;
-        }        
-        else if (m_stateController.m_walk)
-        {
-            m_move *= m_walkSpeedModifier;
-        }
         
         // Account for "hills"
         m_move = Vector3.ProjectOnPlane(m_move, m_groundNormal);
-
         
         Vector3 localMove = transform.InverseTransformVector(m_move);
         m_stateController.m_forwardAmount = localMove.z;
