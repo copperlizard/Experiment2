@@ -140,7 +140,7 @@ ModelImporter:
     400130: Spine1
     400132: Spine2
     4300000: Kachujin
-    7400000: mixamo.com
+    7400000: SneakingLeft
     9500000: //RootNode
     13700000: Kachujin
   materials:
@@ -168,7 +168,7 @@ ModelImporter:
     extraExposedTransformPaths: []
     clipAnimations:
     - serializedVersion: 16
-      name: mixamo.com
+      name: SneakingLeft
       takeName: mixamo.com
       firstFrame: 0
       lastFrame: 76
