@@ -70,6 +70,7 @@
     <Compile Include="Assets\_Scripts\Player\PlayerStateController.cs" />
     <Compile Include="Assets\_Scripts\Player\PlayerWeaponController.cs" />
     <Compile Include="Assets\_Scripts\Player\UserControlInput.cs" />
+    <Compile Include="Assets\_Scripts\Weapons\TestWeapon.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Resources\Raw Mocap Data\Animations\_CompleteAnimationList.txt" />

@@ -41,6 +41,7 @@ public class PlayerMovementController : MonoBehaviour
     {
         // Update player state info        
         m_stateController.m_grounded = CheckGround();
+        m_stateController.m_firing = fire1;
         m_stateController.m_aiming = fire2;
         m_stateController.m_jump = jump && !crouch;
         m_stateController.m_crouch = crouch;
