@@ -6,12 +6,13 @@ using System.Collections.Generic;
 public class Weapon : MonoBehaviour
 {
     //Interface class for weapons 
+    public Transform m_leftHand, m_rightHand, m_rightElbow;
 
     [HideInInspector]
     public float m_leftHandWeight = 1.0f, m_rightHandWeight = 1.0f;
 
     private Animator m_wepAnimator;
-    private bool m_aiming, m_firing, m_crouching, m_sliding;    
+    private bool m_aiming, m_firing, m_crouching, m_sprinting, m_sliding, m_idle;    
 
     void Start ()
     {
@@ -36,16 +37,20 @@ public class Weapon : MonoBehaviour
 
     }
 
-    public virtual void UpdateWepAnimator (bool aiming, bool firing, bool crouching, bool sliding)
+    public virtual void UpdateWepAnimator (bool aiming, bool firing, bool crouching, bool sprinting, bool sliding, bool idle)
     {
         m_aiming = aiming;
         m_firing = firing;
         m_crouching = crouching;
+        m_sprinting = sprinting;
         m_sliding = sliding;
+        m_idle = idle;
         m_wepAnimator.SetBool("Aiming", aiming);
         m_wepAnimator.SetBool("Firing", firing);
         m_wepAnimator.SetBool("Crouching", crouching);
+        m_wepAnimator.SetBool("Sprinting", sprinting);
         m_wepAnimator.SetBool("Sliding", sliding);
+        m_wepAnimator.SetBool("Idle", idle);
     }
 
     public void OnAnimatorIK ()
@@ -82,17 +87,17 @@ public class PlayerWeaponController : MonoBehaviour
 
         m_curWeapon = m_weapons[m_curWeaponNum].GetComponent<TestWeapon>();
 
-        Transform[] wepTrans = m_weapons[m_curWeaponNum].GetComponentsInChildren<Transform>();
-        m_leftHand = wepTrans[0];
-        m_rightHand = wepTrans[1];
-        m_rightElbow = wepTrans[2];
+        m_leftHand = m_curWeapon.m_leftHand;
+        m_rightHand = m_curWeapon.m_rightHand;
+        m_rightElbow = m_curWeapon.m_rightElbow;
 	}
 	
 	// Update is called once per frame
 	void Update ()
     {
-        m_curWeapon.UpdateWepAnimator(m_stateController.m_aiming, m_stateController.m_firing, m_stateController.m_crouch, m_stateController.m_slide);
-	}
+        m_curWeapon.UpdateWepAnimator(m_stateController.m_aiming, m_stateController.m_firing, m_stateController.m_crouch, m_stateController.m_sprint, 
+            m_stateController.m_slide, (m_stateController.m_move.sqrMagnitude < 0.01f));
+    }
 
     void OnAnimatorIK ()
     {

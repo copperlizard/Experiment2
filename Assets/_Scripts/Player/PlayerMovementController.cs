@@ -29,7 +29,7 @@ public class PlayerMovementController : MonoBehaviour
 #if UNITY_EDITOR
         Debug.DrawLine(transform.position, transform.position + transform.forward * 3.0f, Color.red);
         Debug.DrawLine(transform.position, transform.position + m_move, Color.blue);
-#endif
+#endif  
     }
 
     void FixedUpdate ()
