@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 public class OrbitCam : MonoBehaviour
 {
-    public GameObject m_target;
+    public GameObject m_target; //cam follow target
+    public RaycastHit m_hit; //player target
     public float m_minDist, m_maxDist, m_startDist, m_rotSpeed, m_damp, m_fudge;
     public bool m_HideCursor = true;
     public List<LayerMask> m_ignoreIntersect = new List<LayerMask>();
@@ -55,6 +56,13 @@ public class OrbitCam : MonoBehaviour
         //Move camera
         transform.position = Vector3.SmoothDamp(transform.position, tarPos, ref m_curVel, m_damp);
         transform.rotation = m_rot;
+
+        //Find "hit"
+        if(!Physics.Raycast(transform.position, transform.forward, out m_hit, m_maxDist, LayerMask.NameToLayer("Player")))
+        {
+            m_hit.point = transform.position + transform.forward * m_maxDist;
+            m_hit.normal = Vector3.up;
+        }        
     }
 
     void GetInput()
@@ -123,6 +131,17 @@ public class OrbitCam : MonoBehaviour
     {
         return m_dist;
     }
+
+#if UNITY_EDITOR
+    void OnDrawGizmos()
+    {
+        if (Application.isPlaying)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(m_hit.point, 0.05f);            
+        }
+    }
+#endif
 
     /*
     float ClampAngle(float ang, float min, float max)

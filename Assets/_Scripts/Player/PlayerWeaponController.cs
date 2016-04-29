@@ -61,19 +61,19 @@ public class Weapon : MonoBehaviour
 
 [RequireComponent(typeof(Animator))]
 public class PlayerWeaponController : MonoBehaviour
-{
-    //public GameObject m_weaponHolder;
-
-    //DEBUG
-    //public Transform leftHandHold, rightHandHold, rightElbow;    
-
+{   
+    public GameObject m_weaponHolder, m_cam;
+    public float m_maxPan = 45.0f;
+    
     public List<GameObject> m_weapons = new List<GameObject>();
+
+    private OrbitCam m_camController;
     private Weapon m_curWeapon;
 
     private Animator m_playerAnimator;
     private PlayerStateController m_stateController;
 
-    private Transform m_leftHand, m_rightHand, m_rightElbow;
+    private Transform m_leftHand, m_rightHand, m_rightElbow, m_spineTransform;
 
     private float m_rightElbowWeight;
     private int m_curWeaponNum = 0;
@@ -81,7 +81,19 @@ public class PlayerWeaponController : MonoBehaviour
 	// Use this for initialization
 	void Awake ()
     {
+        if (m_cam == null)
+        {
+            m_cam = Camera.main.gameObject;
+        }
+        m_camController = m_cam.GetComponent<OrbitCam>();
+
+        if (m_camController == null)
+        {
+            Debug.Log("NO ORBIT CAM!!!");
+        }
+
         m_playerAnimator = GetComponent<Animator>();
+        m_spineTransform = m_playerAnimator.GetBoneTransform(HumanBodyBones.Spine); //maybe change to ribs... check model rig!!!
 
         m_stateController = GetComponent<PlayerStateController>();
 
@@ -101,8 +113,13 @@ public class PlayerWeaponController : MonoBehaviour
 
     void OnAnimatorIK ()
     {
-        //Add animation layers with avatar masks for the left and right hand with a closed pose, and use hand weight to selectively override hand animations
+        //Add animation layers with avatar masks for the left and right hand with a closed pose, and use hand weight to selectively override hand animations        
+        //Aim weapon here or on weapon animator IK pass?
 
+        //Aim body
+        BodyAim();
+
+        //Hold Weapon
         m_playerAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, m_curWeapon.m_leftHandWeight);
         m_playerAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, m_curWeapon.m_leftHandWeight);
         m_playerAnimator.SetIKPosition(AvatarIKGoal.LeftHand, m_leftHand.position);
@@ -113,11 +130,41 @@ public class PlayerWeaponController : MonoBehaviour
         m_playerAnimator.SetIKPosition(AvatarIKGoal.RightHand, m_rightHand.position);
         m_playerAnimator.SetIKRotation(AvatarIKGoal.RightHand, m_rightHand.rotation);
 
-        m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, Mathf.Lerp(m_rightElbowWeight, (m_stateController.m_aiming) ? 1.0f : 0.0f, 0.1f));
+        m_rightElbowWeight = Mathf.Lerp(m_rightElbowWeight, (m_stateController.m_aiming) ? 1.0f : 0.0f, 0.1f);
+        m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, m_rightElbowWeight);
         m_playerAnimator.SetIKHintPosition(AvatarIKHint.RightElbow, m_rightElbow.position);
-        
-        
-        //aim chest
+    }
+    
+    void BodyAim ()
+    {
+        if (m_stateController.m_aiming)
+        {
+            Vector3 toTar = (m_camController.m_hit.point - m_spineTransform.position).normalized;
+            float turnCheck = Vector3.Dot(transform.forward, toTar);
+
+#if UNITY_EDITOR
+            Debug.DrawLine(m_spineTransform.position, m_spineTransform.position + toTar, Color.red);
+            Debug.DrawLine(m_spineTransform.position, m_spineTransform.position + m_spineTransform.up, Color.blue);
+#endif       
+            
+            Quaternion deltaRot = Quaternion.FromToRotation(m_spineTransform.up, toTar);
+            float pan = deltaRot.eulerAngles.y;
+         
+            Debug.Log(pan.ToString());
+
+
+            //Head
+            //m_playerAnimator.SetLookAtWeight(1.0f);
+            //m_playerAnimator.SetLookAtPosition(m_camController.m_hit.point);
+
+            //Quaternion tarRot = Quaternion.LookRotation((m_camController.m_hit.point - m_spineTransform.position).normalized);
+            //m_playerAnimator.SetBoneLocalRotation(HumanBodyBones.Spine, tarRot);
+
+
+
+            //m_spineTransform.transform.RotateAround(m_spineTransform.transform.position, transform.up, twist);
+            //m_playerAnimator.SetBoneLocalRotation(HumanBodyBones.Spine, m_spineTransform.localRotation);
+        }
     }    
 
     public void ReloadWeapon ()
