@@ -6,14 +6,16 @@ public class OrbitCam : MonoBehaviour
 {
     public GameObject m_target; //cam follow target
     public RaycastHit m_hit; //player target
-    public float m_minDist, m_maxDist, m_startDist, m_rotSpeed, m_damp, m_fudge;
+    public float m_minDist = 0.0f, m_maxDist = 100.0f, m_startDist = 5.0f, m_minTilt, m_maxTilt, m_hidePlayerDist, m_rotSpeed, m_damp, m_fudge;
     public bool m_HideCursor = true;
     public List<LayerMask> m_ignoreIntersect = new List<LayerMask>();
-    
+
+    private SkinnedMeshRenderer[] m_meshRenderers;
     private RaycastHit m_interAt;
     private Quaternion m_rot;
     private Vector3 m_curVel = Vector3.zero;
     private float m_h, m_v, m_d, m_dist;
+    private bool m_playerHidden = false;
 
 	// Use this for initialization
 	void Start()
@@ -30,6 +32,15 @@ public class OrbitCam : MonoBehaviour
         {
             Cursor.visible = true;
         }
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+
+        if (player == null)
+        {
+            Debug.Log("no player found! (ensure player tagged player)");
+        }
+
+        m_meshRenderers = player.GetComponentsInChildren<SkinnedMeshRenderer>(true);
 	}
 	
 	// Update is called once per frame
@@ -42,9 +53,37 @@ public class OrbitCam : MonoBehaviour
     void LateUpdate()
     {
         // Calculate m_rot
-        Quaternion deltaRot = Quaternion.Euler(m_v * m_rotSpeed, m_h * m_rotSpeed, 0.0f);
-        m_rot = deltaRot;
+        //m_rot = Quaternion.Euler(m_v * m_rotSpeed, Mathf.Clamp(m_h * m_rotSpeed, m_minTilt, m_maxTilt), 0.0f);  
+        //m_rot = Quaternion.Euler(m_v * m_rotSpeed, m_h * m_rotSpeed, 0.0f);
+        
+        float tilt;
+        if (m_v * m_rotSpeed < 180.0f)
+        {
+            tilt = m_v * m_rotSpeed;
+        }
+        else
+        {
+            tilt = (m_v * m_rotSpeed) - 360.0f;
+        }
+        
+        if (tilt >= m_maxTilt)
+        {
+            tilt = m_maxTilt;
+            m_v = m_maxTilt / m_rotSpeed;
+        }
+        else if (tilt < m_minTilt)
+        {
+            tilt = m_minTilt;
+            m_v = (m_minTilt + 360.0f) / m_rotSpeed;
+        }
 
+        if (tilt < 0.0f)
+        {
+            tilt += 360.0f;
+        }
+
+        m_rot = Quaternion.Euler(tilt, m_h * m_rotSpeed, 0.0f);
+        
         // Find new cam position
         m_dist -= m_d;        
         m_dist = Mathf.Clamp(m_dist, m_minDist, m_maxDist);
@@ -52,6 +91,34 @@ public class OrbitCam : MonoBehaviour
 
         //Check for sight line intersection
         tarPos = IntersectCheck(tarPos);
+
+        //Hide player and weapons if camera too close
+        float distFromPlayer = (m_target.transform.position - tarPos).magnitude;
+        
+        if (distFromPlayer <= m_hidePlayerDist && !m_playerHidden)
+        {
+            //Debug.Log("Hiding player!");
+
+            m_playerHidden = true;
+            for (int i = 0; i < m_meshRenderers.Length; i++)
+            {
+                //Debug.Log("Hiding mesh " + i.ToString() + " ; " + m_meshRenderers[i].name.ToString());
+
+                m_meshRenderers[i].enabled = false;
+            }
+        }
+        else if (distFromPlayer > m_hidePlayerDist && m_playerHidden)
+        {
+            //Debug.Log("Un Hiding player!");
+
+            m_playerHidden = false;
+            for (int i = 0; i < m_meshRenderers.Length; i++)
+            {
+                //Debug.Log("Un Hiding mesh " + i.ToString());
+
+                m_meshRenderers[i].enabled = true;
+            }
+        }
 
         //Move camera
         transform.position = Vector3.SmoothDamp(transform.position, tarPos, ref m_curVel, m_damp);
@@ -143,7 +210,6 @@ public class OrbitCam : MonoBehaviour
     }
 #endif
 
-    /*
     float ClampAngle(float ang, float min, float max)
     {
         if (ang < -360.0f)
@@ -155,6 +221,5 @@ public class OrbitCam : MonoBehaviour
             ang -= 360.0f;
         }
         return Mathf.Clamp(ang, min, max);
-    }
-    */
+    }    
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Weapon : MonoBehaviour
 {
     //Interface class for weapons 
-    public Transform m_leftHand, m_rightHand, m_rightElbow;
+    public Transform m_leftHand, m_rightHand, m_leftElbow, m_rightElbow;
 
     [HideInInspector]
     public float m_leftHandWeight = 1.0f, m_rightHandWeight = 1.0f;
@@ -73,7 +73,7 @@ public class PlayerWeaponController : MonoBehaviour
     private Animator m_playerAnimator;
     private PlayerStateController m_stateController;
 
-    private Transform m_leftHand, m_rightHand, m_rightElbow, m_spineTransform;
+    private Transform m_leftHand, m_rightHand, m_leftElbow, m_rightElbow, m_spineTransform;
 
     private float m_rightElbowWeight;
     private int m_curWeaponNum = 0;
@@ -101,8 +101,9 @@ public class PlayerWeaponController : MonoBehaviour
 
         m_leftHand = m_curWeapon.m_leftHand;
         m_rightHand = m_curWeapon.m_rightHand;
+        m_leftElbow = m_curWeapon.m_leftElbow;
         m_rightElbow = m_curWeapon.m_rightElbow;
-	}
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -138,6 +139,9 @@ public class PlayerWeaponController : MonoBehaviour
         m_rightElbowWeight = Mathf.Lerp(m_rightElbowWeight, (m_stateController.m_aiming) ? 1.0f : 0.0f, 0.1f);
         m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, m_rightElbowWeight);
         m_playerAnimator.SetIKHintPosition(AvatarIKHint.RightElbow, m_rightElbow.position);
+
+        m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, m_rightElbowWeight);
+        m_playerAnimator.SetIKHintPosition(AvatarIKHint.LeftElbow, m_leftElbow.position);
     }
 
     void BodyAim ()
@@ -198,7 +202,7 @@ public class PlayerWeaponController : MonoBehaviour
 
             Vector3 toTar = ((m_camController.m_hit.point + tarOffset) - m_weaponHolder.transform.position).normalized;
 
-            float turnCheck = Vector3.Dot(m_weaponHolder.transform.forward, transform.forward);
+            float turnCheck = Vector3.Dot(toTar, transform.forward);
 
 
 #if UNITY_EDITOR

@@ -60,6 +60,7 @@ public class PlayerAnimationController : MonoBehaviour
         m_animator.SetFloat("Sideways", m_stateController.m_sidewaysAmount, 0.1f, Time.deltaTime);
         m_animator.SetFloat("Turn", turn, 0.1f, Time.deltaTime);
         m_animator.SetBool("OnGround", m_stateController.m_grounded);
+        m_animator.SetBool("Aiming", m_stateController.m_aiming);
         m_animator.SetBool("Crouch", m_stateController.m_crouch);
         m_animator.SetBool("Slide", m_stateController.m_slide);
 
@@ -128,6 +129,12 @@ public class PlayerAnimationController : MonoBehaviour
     void RotatePlayer(float ang) 
     {
         float turnSpeed = Mathf.Lerp(m_stationaryTurnSpeed, m_movingTurnSpeed, m_stateController.m_forwardAmount);
+
+        if (m_stateController.m_aiming)
+        {
+            turnSpeed *= 2.0f;
+        }
+
         transform.Rotate(0, ang * turnSpeed * Time.deltaTime, 0);
     }
 
