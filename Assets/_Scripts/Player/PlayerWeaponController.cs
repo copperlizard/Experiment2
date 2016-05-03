@@ -63,7 +63,7 @@ public class Weapon : MonoBehaviour
 public class PlayerWeaponController : MonoBehaviour
 {   
     public GameObject m_weaponHolder, m_cam;
-    public float m_maxPan = 60.0f;
+    public float m_maxPan = 60.0f, m_weaponAimSpeed = 0.1f;
     
     public List<GameObject> m_weapons = new List<GameObject>();
 
@@ -198,25 +198,35 @@ public class PlayerWeaponController : MonoBehaviour
     {
         if (m_stateController.m_aiming)
         {
-            Vector3 tarOffset = m_weapons[m_curWeaponNum].transform.position - m_weaponHolder.transform.position;
+            Vector3 wepPosOffset = m_weapons[m_curWeaponNum].transform.position - m_weaponHolder.transform.position;
 
-            Vector3 toTar = ((m_camController.m_hit.point + tarOffset) - m_weaponHolder.transform.position).normalized;
+            Vector3 toTar = ((m_camController.m_hit.point + wepPosOffset) - m_weaponHolder.transform.position).normalized;
 
             float turnCheck = Vector3.Dot(toTar, transform.forward);
+            if (turnCheck > 0.0f)
+            {   
+                Quaternion tarRot = Quaternion.LookRotation(toTar);
+                Quaternion deltaRot = tarRot * Quaternion.Inverse(m_weaponHolder.transform.rotation);
 
+                Debug.Log(deltaRot.eulerAngles.ToString());
+
+                Vector3 rottedOffset = deltaRot * wepPosOffset;
+
+                m_weapons[m_curWeaponNum].transform.position = m_weaponHolder.transform.position + rottedOffset;
+
+                Vector3 wepToTar = (m_camController.m_hit.point - m_weapons[m_curWeaponNum].transform.position).normalized;
+                Quaternion wepTarRot = Quaternion.LookRotation(wepToTar);
+                
+                m_weapons[m_curWeaponNum].transform.rotation = wepTarRot;
 
 #if UNITY_EDITOR
-            Debug.DrawLine(m_weaponHolder.transform.position, m_weaponHolder.transform.position + tarOffset);
-            Debug.DrawLine(m_weaponHolder.transform.position, m_weaponHolder.transform.position + toTar, Color.red);
-            Debug.DrawLine(m_weaponHolder.transform.position, m_weaponHolder.transform.position + m_weaponHolder.transform.forward, Color.blue);
+                Debug.DrawLine(m_weapons[m_curWeaponNum].transform.position, m_weapons[m_curWeaponNum].transform.position + wepToTar, Color.red);
 #endif
-
-            if (turnCheck > 0.5f)
-            {
-                Quaternion tarRot = Quaternion.LookRotation(toTar);
-
-                m_weaponHolder.transform.rotation = tarRot;
             }
+            else
+            {
+                //shit               
+            }            
         }
     }
 
