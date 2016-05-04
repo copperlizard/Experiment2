@@ -14,6 +14,8 @@ public class PlayerAnimationController : MonoBehaviour
     private Animator m_animator;
     private Rigidbody m_rb;
 
+    private float m_turn;
+
 	// Use this for initialization
 	void Start ()
     {
@@ -35,22 +37,22 @@ public class PlayerAnimationController : MonoBehaviour
         //float turnB = (m_playerStateController.m_turnTarAng + 360.0f) - transform.rotation.eulerAngles.y;
         //float turn = Mathf.Min(Mathf.Abs(turnA), Mathf.Abs(turnB));
 
-        float turn = m_stateController.m_turnTarAng - transform.rotation.eulerAngles.y;
+        m_turn = m_stateController.m_turnTarAng - transform.rotation.eulerAngles.y;
 
-        if (Mathf.Abs(turn) > 180.0f)
+        if (Mathf.Abs(m_turn) > 180.0f)
         {
             if (transform.rotation.eulerAngles.y < m_stateController.m_turnTarAng)
             {
-                turn = m_stateController.m_turnTarAng - (transform.rotation.eulerAngles.y + 360.0f);
+                m_turn = m_stateController.m_turnTarAng - (transform.rotation.eulerAngles.y + 360.0f);
             }
             else
             {
-                turn = (m_stateController.m_turnTarAng + 360.0f) - transform.rotation.eulerAngles.y;
+                m_turn = (m_stateController.m_turnTarAng + 360.0f) - transform.rotation.eulerAngles.y;
             }
         }
-        turn /= 180.0f;
+        m_turn /= 180.0f;
 
-        RotatePlayer(turn);
+        RotatePlayer(m_turn);
 
         JumpPlayer();
 
@@ -58,7 +60,7 @@ public class PlayerAnimationController : MonoBehaviour
         m_animator.SetLayerWeight(1, (m_stateController.m_aiming) ? Mathf.Lerp(m_animator.GetLayerWeight(1), 1.0f, 0.1f) : Mathf.Lerp(m_animator.GetLayerWeight(1), 0.0f, 0.1f)); //set aiming layer weight
         m_animator.SetFloat("Forward", m_stateController.m_forwardAmount, 0.1f, Time.deltaTime);
         m_animator.SetFloat("Sideways", m_stateController.m_sidewaysAmount, 0.1f, Time.deltaTime);
-        m_animator.SetFloat("Turn", turn, 0.1f, Time.deltaTime);
+        m_animator.SetFloat("Turn", m_turn, 0.1f, Time.deltaTime);
         m_animator.SetBool("OnGround", m_stateController.m_grounded);
         m_animator.SetBool("Aiming", m_stateController.m_aiming);
         m_animator.SetBool("Crouch", m_stateController.m_crouch);
@@ -132,7 +134,8 @@ public class PlayerAnimationController : MonoBehaviour
 
         if (m_stateController.m_aiming)
         {
-            turnSpeed *= 2.0f;
+            turnSpeed *= 4.0f;
+            m_turn *= 4.0f;           
         }
 
         transform.Rotate(0, ang * turnSpeed * Time.deltaTime, 0);

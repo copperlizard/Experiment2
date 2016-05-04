@@ -203,12 +203,13 @@ public class PlayerWeaponController : MonoBehaviour
             Vector3 toTar = ((m_camController.m_hit.point + wepPosOffset) - m_weaponHolder.transform.position).normalized;
 
             float turnCheck = Vector3.Dot(toTar, transform.forward);
-            if (turnCheck > 0.0f)
+            if (turnCheck >= 0.0f)            
             {   
                 Quaternion tarRot = Quaternion.LookRotation(toTar);
                 Quaternion deltaRot = tarRot * Quaternion.Inverse(m_weaponHolder.transform.rotation);
 
-                Debug.Log(deltaRot.eulerAngles.ToString());
+                //Debug.Log("tarRot == " + tarRot.eulerAngles.ToString() + " ; deltaRot == " + deltaRot.eulerAngles.ToString());
+                //Debug.Log("transform.rotation == " + transform.rotation.eulerAngles.ToString());
 
                 Vector3 rottedOffset = deltaRot * wepPosOffset;
 
@@ -225,8 +226,96 @@ public class PlayerWeaponController : MonoBehaviour
             }
             else
             {
-                //shit               
-            }            
+                //Debug.Log("turnCheck < 0.0");
+
+                Quaternion tarRot = Quaternion.LookRotation(toTar);
+                Quaternion deltaRot = tarRot * Quaternion.Inverse(m_weaponHolder.transform.rotation);
+
+                float pan, tilt;
+                if (deltaRot.eulerAngles.y <= 180.0f)
+                {
+                    //Debug.Log("aiming right!");
+                    pan = deltaRot.eulerAngles.y;
+                    pan = Mathf.Clamp(pan, -45.0f, 45.0f);
+                }
+                else
+                {
+                    //Debug.Log("aiming left!");
+                    pan = deltaRot.eulerAngles.y - 360.0f;
+                    pan = Mathf.Clamp(pan, -45.0f, 45.0f);
+                }
+
+                if (deltaRot.eulerAngles.x <= 180.0f)
+                {
+                    //Debug.Log("aiming down!");
+                    tilt = deltaRot.eulerAngles.x;
+                    tilt = Mathf.Clamp(tilt, -45.0f, 45.0f);
+                }
+                else
+                {
+                    //Debug.Log("aiming up!");
+                    tilt = deltaRot.eulerAngles.x - 360.0f;
+                    tilt = Mathf.Clamp(tilt, -45.0f, 45.0f);
+                }
+
+                //Debug.Log("pan == " + pan.ToString());
+
+                deltaRot = Quaternion.Euler(tilt, pan, deltaRot.eulerAngles.z);
+
+                //Debug.Log("tarRot == " + tarRot.eulerAngles.ToString() + " ; deltaRot == " + deltaRot.eulerAngles.ToString());
+                //Debug.Log("transform.rotation == " + transform.rotation.eulerAngles.ToString());
+
+                Vector3 rottedOffset = deltaRot * wepPosOffset;
+
+                m_weapons[m_curWeaponNum].transform.position = m_weaponHolder.transform.position + rottedOffset;
+
+                
+                Vector3 wepToTar = (m_camController.m_hit.point - m_weapons[m_curWeaponNum].transform.position).normalized;
+                
+                Quaternion wepTarRot = Quaternion.LookRotation(wepToTar);
+
+                /*
+                //Debug.Log("wepTarRot == " + wepTarRot.eulerAngles.ToString());
+                if (wepTarRot.eulerAngles.y <= 180.0f)
+                {
+                    //Debug.Log("gun aiming right!");
+                    pan = wepTarRot.eulerAngles.y;
+                    pan = Mathf.Clamp(pan, -90.0f, 90.0f);
+                }
+                else
+                {
+                    //Debug.Log("gun aiming left!");
+                    pan = wepTarRot.eulerAngles.y - 360.0f;
+                    pan = Mathf.Clamp(pan, -90.0f, 0.0f);
+                    pan += 360.0f;
+                }
+
+                wepTarRot = Quaternion.Euler(wepTarRot.eulerAngles.x, pan, wepTarRot.eulerAngles.z);
+                */
+                /*
+                if (wepTarRot.eulerAngles.x <= 180.0f)
+                {
+                    //Debug.Log("gun aiming down!");
+                    tilt = wepTarRot.eulerAngles.x;
+                    tilt = Mathf.Clamp(tilt, -90.0f, 90.0f);
+                }
+                else
+                {
+                    //Debug.Log("gun aiming up!");
+                    tilt = wepTarRot.eulerAngles.x - 360.0f;
+                    tilt = Mathf.Clamp(tilt, -90.0f, 90.0f);
+                }
+
+                wepTarRot = Quaternion.Euler(tilt, pan, wepTarRot.eulerAngles.z);
+                */
+
+                m_weapons[m_curWeaponNum].transform.rotation = wepTarRot;
+                
+
+#if UNITY_EDITOR
+                Debug.DrawLine(m_weapons[m_curWeaponNum].transform.position, m_weapons[m_curWeaponNum].transform.position + wepToTar, Color.red);
+#endif
+            }
         }
     }
 
