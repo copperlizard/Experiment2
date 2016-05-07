@@ -134,9 +134,10 @@ public class OrbitCam : MonoBehaviour
 
     void GetInput()
     {
-        m_h += Input.GetAxis("Mouse X");
-        m_v -= Input.GetAxis("Mouse Y");
-        m_d = Input.GetAxis("Mouse ScrollWheel");        
+        bool aiming = Input.GetMouseButton(1);
+        m_h += Input.GetAxis("Mouse X") * ((aiming) ? 0.5f : 1.0f);
+        m_v -= Input.GetAxis("Mouse Y") * ((aiming) ? 0.5f : 1.0f);
+        //m_d = Input.GetAxis("Mouse ScrollWheel");
     }
 
     Vector3 IntersectCheck(Vector3 target)

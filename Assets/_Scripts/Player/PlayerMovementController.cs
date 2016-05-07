@@ -37,12 +37,13 @@ public class PlayerMovementController : MonoBehaviour
         
     }
     
-    public void Move (float v, float h, bool fire1, bool fire2, bool jump, bool crouch, bool walk, bool sprint)
+    public void Move (float v, float h, bool fire1, bool fire2, bool reload, bool jump, bool crouch, bool walk, bool sprint)
     {
         // Update player state info        
         m_stateController.m_grounded = CheckGround();
-        m_stateController.m_firing = fire1;
+        m_stateController.m_firing = fire1 && !reload;
         m_stateController.m_aiming = fire2;
+        m_stateController.m_reloading = reload;
         m_stateController.m_jump = jump && !crouch;
         m_stateController.m_crouch = crouch;
         m_stateController.m_walk = walk && !crouch && !sprint; //crouching and or sprint cancels walk
@@ -50,7 +51,7 @@ public class PlayerMovementController : MonoBehaviour
 
         // Check if sliding
         m_stateController.m_slide = (m_stateController.m_move.magnitude > 1.0f) && crouch;
-        
+
         // Check for head room
         HeadCheck();
 

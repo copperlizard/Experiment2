@@ -8,7 +8,7 @@ public class PlayerStateController : MonoBehaviour
     [HideInInspector]
     public float m_forwardAmount, m_sidewaysAmount, m_turnTarAng;
     [HideInInspector]
-    public bool m_grounded, m_aiming, m_firing, m_jump, m_crouch, m_slide, m_walk, m_sprint;
+    public bool m_grounded, m_aiming, m_firing, m_reloading, m_jump, m_crouch, m_slide, m_walk, m_sprint;
 
 	// Use this for initialization
 	void Start ()

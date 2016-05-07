@@ -7,7 +7,7 @@ public class UserControlInput : MonoBehaviour
     private PlayerMovementController m_mover;
 
     private float m_v, m_h;
-    private bool m_fire1, m_fire2, m_jump, m_crouch, m_walk, m_sprint;
+    private bool m_fire1, m_fire2, m_reload, m_jump, m_crouch, m_walk, m_sprint;
 
 	// Use this for initialization
 	void Start ()
@@ -22,14 +22,15 @@ public class UserControlInput : MonoBehaviour
         m_h = Input.GetAxis("Horizontal");
         m_fire1 = Input.GetMouseButton(0);
         m_fire2 = Input.GetMouseButton(1);
+        m_reload = Input.GetKey(KeyCode.R);
         m_jump = Input.GetKey(KeyCode.Space);
         m_crouch = Input.GetKey(KeyCode.C);
         m_walk = Input.GetKey(KeyCode.LeftAlt);
-        m_sprint = Input.GetKey(KeyCode.LeftShift);        
+        m_sprint = Input.GetKey(KeyCode.LeftShift);
 	}
 
     void FixedUpdate ()
     {
-        m_mover.Move(m_v, m_h, m_fire1, m_fire2, m_jump, m_crouch, m_walk, m_sprint);
+        m_mover.Move(m_v, m_h, m_fire1, m_fire2, m_reload, m_jump, m_crouch, m_walk, m_sprint);
     }
 }

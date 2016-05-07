@@ -3,44 +3,155 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(AudioSource))]
 public class Weapon : MonoBehaviour
 {
     //Interface class for weapons 
-    public Transform m_leftHand, m_rightHand, m_leftElbow, m_rightElbow;
+    public Transform m_leftHand, m_rightHand, m_leftElbow, m_rightElbow, m_firePos;
+
+    public GameObject m_weaponHUD;       
+
+    public float m_projectileSpeed = 3.0f;
+    public int m_magazineSize = 100, m_rounds = 1000;
+
+    public AudioClip m_fireNoise;
 
     [HideInInspector]
     public float m_leftHandWeight = 1.0f, m_rightHandWeight = 1.0f;
 
+    private AudioSource m_audioSource;
+    private ObjectPool m_ammo;
     private Animator m_wepAnimator;
-    private bool m_aiming, m_firing, m_crouching, m_sprinting, m_sliding, m_idle;    
+    private int m_thisMagazine;
+    private bool m_aiming, m_firing, m_fired, m_reloading, m_reloaded, m_crouching, m_sprinting, m_sliding, m_idle;    
 
     void Start ()
     {
         m_wepAnimator = GetComponent<Animator>();
+
+        m_audioSource = GetComponent<AudioSource>();
+
+        m_ammo = GetComponentInChildren<ObjectPool>();
+
+        m_thisMagazine = m_magazineSize;
     }
 
     public virtual void Update ()
     {
-        if(m_aiming && m_firing)
+        if (m_aiming)
         {
-            Fire();
+            if (!m_weaponHUD.activeInHierarchy)
+            {
+                m_weaponHUD.SetActive(true);
+            }
+            
+            if (m_firing)
+            {
+                Fire();
+            }
         }
+        else
+        {
+            if (m_weaponHUD.activeInHierarchy)
+            {
+                m_weaponHUD.SetActive(false);
+            }            
+        }
+        
+        if (m_reloading)
+        {
+            Reload();
+        }        
+    }
+
+    IEnumerator Firing ()
+    {
+        //Wait for animator transition
+        while (!m_wepAnimator.GetCurrentAnimatorStateInfo(0).IsName("GunFire"))
+        {
+            //Debug.Log("Waiting for animator!!!");
+
+            yield return null;
+        }
+
+        //Shoot projectile
+        Debug.DrawLine(m_firePos.transform.position, m_firePos.transform.position + m_firePos.transform.forward);
+
+        GameObject shot = m_ammo.GetObject();
+        shot.transform.position = m_firePos.transform.position;
+        shot.transform.rotation = Quaternion.LookRotation(m_firePos.transform.forward);
+
+        Rigidbody shotRB = shot.GetComponent<Rigidbody>();
+        shot.SetActive(true);
+        shotRB.velocity = m_firePos.transform.forward * m_projectileSpeed;
+
+        m_thisMagazine--;
+
+        m_audioSource.PlayOneShot(m_fireNoise);
+
+        //Wait for animator transition
+        while (m_wepAnimator.GetCurrentAnimatorStateInfo(0).IsName("GunFire"))
+        {
+            //Debug.Log("Waiting for animator!!!");
+
+            yield return null;
+        }
+
+        //Reset
+        m_fired = false;
+
+        //Debug.Log("Fired!!!");
     }
 
     public virtual void Fire ()
     {
-
+        if (!m_fired && m_thisMagazine > 0)
+        {
+            m_fired = true;
+            m_wepAnimator.SetTrigger("Fire");
+            StartCoroutine(Firing());
+        }       
     }
 
+    IEnumerator Reloading ()
+    {
+        //Wait for animator transition
+        while (!m_wepAnimator.GetCurrentAnimatorStateInfo(0).IsName("GunReload"))
+        {
+            //Debug.Log("Waiting for animator!!!");
+
+            yield return null;
+        }
+
+        while (m_wepAnimator.GetCurrentAnimatorStateInfo(0).IsName("GunReload"))
+        {
+            //Debug.Log("Waiting for animator!!!");
+
+            yield return null;
+        }
+
+        int dif = m_magazineSize - m_thisMagazine;
+        dif = Mathf.Clamp(dif, 0, m_rounds);
+        m_thisMagazine += dif;
+        m_rounds -= dif;        
+        m_reloaded = false;
+    }
+    
     public virtual void Reload ()
     {
-
+        if (!m_reloaded)
+        {
+            m_reloaded = true;
+            m_wepAnimator.SetTrigger("Reload");
+            StartCoroutine(Reloading());
+        }
     }
 
-    public virtual void UpdateWepAnimator (bool aiming, bool firing, bool crouching, bool sprinting, bool sliding, bool idle, bool grounded)
+    public virtual void UpdateWepAnimator (bool aiming, bool firing, bool reloading, bool crouching, bool sprinting, bool sliding, bool idle, bool grounded)
     {
         m_aiming = aiming;
         m_firing = firing;
+        m_reloading = reloading;
         m_crouching = crouching && grounded;
         m_sprinting = sprinting && grounded;
         m_sliding = sliding && grounded;
@@ -63,8 +174,10 @@ public class Weapon : MonoBehaviour
 public class PlayerWeaponController : MonoBehaviour
 {   
     public GameObject m_weaponHolder, m_cam;
-    public float m_maxPan = 60.0f, m_weaponAimSpeed = 0.1f;
-    
+    public float m_maxPan = 60.0f, m_weaponAimSpeed = 0.1f, m_camAimDist = 1.0f;
+    public Vector3 m_camTarAimPosOffset = new Vector3(0.2f, 0.0f, 0.0f);
+
+
     public List<GameObject> m_weapons = new List<GameObject>();
 
     private OrbitCam m_camController;
@@ -75,7 +188,9 @@ public class PlayerWeaponController : MonoBehaviour
 
     private Transform m_leftHand, m_rightHand, m_leftElbow, m_rightElbow, m_spineTransform;
 
-    private float m_rightElbowWeight;
+    private Vector3 m_camTarStartLocalPos;
+
+    private float m_rightElbowWeight, m_lastCamDist;
     private int m_curWeaponNum = 0;
 
 	// Use this for initialization
@@ -87,6 +202,8 @@ public class PlayerWeaponController : MonoBehaviour
         }
         m_camController = m_cam.GetComponent<OrbitCam>();
 
+        m_camTarStartLocalPos = m_camController.m_target.transform.localPosition;        
+
         if (m_camController == null)
         {
             Debug.Log("NO ORBIT CAM!!!");
@@ -97,33 +214,37 @@ public class PlayerWeaponController : MonoBehaviour
 
         m_stateController = GetComponent<PlayerStateController>();
 
-        m_curWeapon = m_weapons[m_curWeaponNum].GetComponent<TestWeapon>();
+        m_curWeapon = m_weapons[m_curWeaponNum].GetComponent<LazerAssaultRifle>();
 
         m_leftHand = m_curWeapon.m_leftHand;
         m_rightHand = m_curWeapon.m_rightHand;
         m_leftElbow = m_curWeapon.m_leftElbow;
         m_rightElbow = m_curWeapon.m_rightElbow;
     }
+
+    void Start ()
+    {
+        m_lastCamDist = m_camController.GetCamDist();
+    }
 	
 	// Update is called once per frame
 	void Update ()
     {
-        m_curWeapon.UpdateWepAnimator(m_stateController.m_aiming, m_stateController.m_firing, m_stateController.m_crouch, m_stateController.m_sprint, 
+        m_curWeapon.UpdateWepAnimator(m_stateController.m_aiming, m_stateController.m_firing, m_stateController.m_reloading, m_stateController.m_crouch, m_stateController.m_sprint, 
             m_stateController.m_slide, (m_stateController.m_move.sqrMagnitude < 0.01f), m_stateController.m_grounded);
     }
         
     void OnAnimatorIK (int layer)
-    {        
+    {    
+        //Aiming layer    
         if (layer == 1)
-        {
-            //Add animation layers with avatar masks for the left and right hand with a closed pose, and use layer weight to selectively override hand animations        
-            //Aim/tilt weapon here or on weapon animator IK pass?
-
-            //Aim body
+        {   
             BodyAim();
-
-            WeaponAim();           
+            WeaponAim();                       
         }
+
+        //Aim Camera
+        CamAim();
 
         //Hold Weapon
         m_playerAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, m_curWeapon.m_leftHandWeight);
@@ -181,8 +302,6 @@ public class PlayerWeaponController : MonoBehaviour
             {
                 pan = -m_maxPan;
             }
-         
-            //Debug.Log(pan.ToString());
             
             //Head
             m_playerAnimator.SetLookAtWeight(Mathf.Lerp(0.4f, 1.0f, turnCheck));
@@ -315,6 +434,33 @@ public class PlayerWeaponController : MonoBehaviour
 #if UNITY_EDITOR
                 Debug.DrawLine(m_weapons[m_curWeaponNum].transform.position, m_weapons[m_curWeaponNum].transform.position + wepToTar, Color.red);
 #endif
+            }
+        }
+    }
+
+    void CamAim()
+    {
+        if (m_stateController.m_aiming)
+        {
+            m_camController.m_target.transform.localPosition = m_camTarStartLocalPos + m_camTarAimPosOffset;
+            
+            if (m_camController.GetCamDist() != m_camAimDist)
+            {
+                m_lastCamDist = m_camController.GetCamDist();
+                m_camController.SetCamDist(m_camAimDist);
+            }
+        }
+        else
+        {
+            m_camController.m_target.transform.localPosition = m_camTarStartLocalPos;
+            
+            if (m_camController.GetCamDist() == m_camAimDist)
+            {
+                m_camController.SetCamDist(m_lastCamDist);
+            }
+            else
+            {
+                m_lastCamDist = m_camController.GetCamDist();
             }
         }
     }
