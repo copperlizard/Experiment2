@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -14,7 +15,7 @@ public class Weapon : MonoBehaviour
     public float m_projectileSpeed = 3.0f;
     public int m_magazineSize = 100, m_rounds = 1000;
 
-    public AudioClip m_fireNoise;
+    public AudioClip m_fireNoise, m_emptyNoise, m_reloadNoise;
 
     [HideInInspector]
     public float m_leftHandWeight = 1.0f, m_rightHandWeight = 1.0f;
@@ -58,7 +59,7 @@ public class Weapon : MonoBehaviour
             }            
         }
         
-        if (m_reloading)
+        if (m_reloading && m_thisMagazine < m_magazineSize)
         {
             Reload();
         }        
@@ -110,7 +111,11 @@ public class Weapon : MonoBehaviour
             m_fired = true;
             m_wepAnimator.SetTrigger("Fire");
             StartCoroutine(Firing());
-        }       
+        } 
+        else if (m_thisMagazine <= 0 && !m_audioSource.isPlaying)
+        {               
+            m_audioSource.PlayOneShot(m_emptyNoise);
+        }      
     }
 
     IEnumerator Reloading ()
@@ -122,6 +127,8 @@ public class Weapon : MonoBehaviour
 
             yield return null;
         }
+
+        m_audioSource.PlayOneShot(m_reloadNoise);
 
         while (m_wepAnimator.GetCurrentAnimatorStateInfo(0).IsName("GunReload"))
         {
@@ -176,6 +183,18 @@ public class PlayerWeaponController : MonoBehaviour
     public GameObject m_weaponHolder, m_cam;
     public float m_maxPan = 60.0f, m_weaponAimSpeed = 0.1f, m_camAimDist = 1.0f;
     public Vector3 m_camTarAimPosOffset = new Vector3(0.2f, 0.0f, 0.0f);
+
+
+    [System.Serializable]
+    public class PlayerHUD
+    {
+        public Text m_wepAndAmmoText;
+
+        public Slider m_healthSlider, m_ammoSlider;
+        
+        public  Image m_wepImage1, m_wepImage2, m_wepImage3;
+    }
+    public PlayerHUD m_HUD;
 
 
     public List<GameObject> m_weapons = new List<GameObject>();
