@@ -71,5 +71,6 @@ public class LazerAssaultRifleLazer : MonoBehaviour
         }
 
         StartCoroutine(DeactivateTimer(0.05f, m_hitEffect));
+        StartCoroutine(DeactivateTimer(0.06f, gameObject));        
     }
 }

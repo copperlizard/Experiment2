@@ -7,7 +7,9 @@ using System.Collections.Generic;
 [RequireComponent(typeof(AudioSource))]
 public class Weapon : MonoBehaviour
 {
-    //Interface class for weapons 
+    //Interface class for weapons
+    public string m_wepName = "Default";
+         
     public Transform m_leftHand, m_rightHand, m_leftElbow, m_rightElbow, m_firePos;
 
     public GameObject m_weaponHUD;       
@@ -20,13 +22,16 @@ public class Weapon : MonoBehaviour
     [HideInInspector]
     public float m_leftHandWeight = 1.0f, m_rightHandWeight = 1.0f;
 
+    [HideInInspector]
+    public int m_thisMagazine;
+
     private AudioSource m_audioSource;
     private ObjectPool m_ammo;
     private Animator m_wepAnimator;
-    private int m_thisMagazine;
+    
     private bool m_aiming, m_firing, m_fired, m_reloading, m_reloaded, m_crouching, m_sprinting, m_sliding, m_idle;    
 
-    void Start ()
+    void Awake ()
     {
         m_wepAnimator = GetComponent<Animator>();
 
@@ -35,6 +40,13 @@ public class Weapon : MonoBehaviour
         m_ammo = GetComponentInChildren<ObjectPool>();
 
         m_thisMagazine = m_magazineSize;
+    }
+
+    void OnEnable ()
+    {
+        //Debug.Log("rebinding animator!");
+
+        m_wepAnimator.Rebind();
     }
 
     public virtual void Update ()
@@ -184,7 +196,6 @@ public class PlayerWeaponController : MonoBehaviour
     public float m_maxPan = 60.0f, m_weaponAimSpeed = 0.1f, m_camAimDist = 1.0f;
     public Vector3 m_camTarAimPosOffset = new Vector3(0.2f, 0.0f, 0.0f);
 
-
     [System.Serializable]
     public class PlayerHUD
     {
@@ -195,7 +206,6 @@ public class PlayerWeaponController : MonoBehaviour
         public  Image m_wepImage1, m_wepImage2, m_wepImage3;
     }
     public PlayerHUD m_HUD;
-
 
     public List<GameObject> m_weapons = new List<GameObject>();
 
@@ -211,6 +221,8 @@ public class PlayerWeaponController : MonoBehaviour
 
     private float m_rightElbowWeight, m_lastCamDist;
     private int m_curWeaponNum = 0;
+
+    private bool m_holstered = false;
 
 	// Use this for initialization
 	void Awake ()
@@ -233,7 +245,7 @@ public class PlayerWeaponController : MonoBehaviour
 
         m_stateController = GetComponent<PlayerStateController>();
 
-        m_curWeapon = m_weapons[m_curWeaponNum].GetComponent<LazerAssaultRifle>();
+        m_curWeapon = m_weapons[m_curWeaponNum].GetComponent<Weapon>();
 
         m_leftHand = m_curWeapon.m_leftHand;
         m_rightHand = m_curWeapon.m_rightHand;
@@ -249,39 +261,112 @@ public class PlayerWeaponController : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        m_curWeapon.UpdateWepAnimator(m_stateController.m_aiming, m_stateController.m_firing, m_stateController.m_reloading, m_stateController.m_crouch, m_stateController.m_sprint, 
+        if (m_stateController.m_holster && !m_holstered)
+        {
+            HolsterWeapon();
+            m_holstered = true;
+        }
+        else if (m_stateController.m_holster && m_holstered)
+        {
+            SelectWeapon(m_stateController.m_wepNum);
+            m_holstered = false;
+        }
+
+        if (m_curWeaponNum != m_stateController.m_wepNum)
+        {
+            SelectWeapon(m_stateController.m_wepNum);
+        }
+
+        if (!m_holstered)
+        {
+            m_curWeapon.UpdateWepAnimator(m_stateController.m_aiming, m_stateController.m_firing, m_stateController.m_reloading, m_stateController.m_crouch, m_stateController.m_sprint,
             m_stateController.m_slide, (m_stateController.m_move.sqrMagnitude < 0.01f), m_stateController.m_grounded);
+        }        
+
+        UpdateHUD();
+    }
+
+    void UpdateHUD ()
+    {
+        string txt = m_curWeapon.m_wepName + " | " + m_curWeapon.m_thisMagazine.ToString() + "/" + m_curWeapon.m_magazineSize.ToString() + "/" + m_curWeapon.m_rounds.ToString();
+
+        m_HUD.m_wepAndAmmoText.text = txt;
+
+        m_HUD.m_healthSlider.value = m_stateController.m_playerHealth;
+
+        if (!m_holstered)
+        {
+            m_HUD.m_ammoSlider.value = (float)m_curWeapon.m_thisMagazine / (float)m_curWeapon.m_magazineSize;
+        }
+        else
+        {
+            m_HUD.m_ammoSlider.value = 0.0f;
+        }        
+
+        switch(m_curWeaponNum)
+        {            
+            case 0:
+                m_HUD.m_wepImage1.color = Color.white;
+                m_HUD.m_wepImage2.color = Color.grey;
+                m_HUD.m_wepImage3.color = Color.grey;
+                break;
+            case 1:
+                m_HUD.m_wepImage1.color = Color.grey;
+                m_HUD.m_wepImage2.color = Color.white;
+                m_HUD.m_wepImage3.color = Color.grey;
+                break;
+            case 2:
+                m_HUD.m_wepImage1.color = Color.grey;
+                m_HUD.m_wepImage2.color = Color.grey;
+                m_HUD.m_wepImage3.color = Color.white;
+                break;
+        }
     }
         
     void OnAnimatorIK (int layer)
     {    
-        //Aiming layer    
-        if (layer == 1)
-        {   
-            BodyAim();
-            WeaponAim();                       
+        if (!m_holstered)
+        {
+            //Aiming layer    
+            if (layer == 1)
+            {
+                BodyAim();
+                WeaponAim();
+            }
+
+            //Aim Camera
+            CamAim();
+
+            //Hold Weapon
+            m_playerAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, m_curWeapon.m_leftHandWeight);
+            m_playerAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, m_curWeapon.m_leftHandWeight);
+            m_playerAnimator.SetIKPosition(AvatarIKGoal.LeftHand, m_leftHand.position);
+            m_playerAnimator.SetIKRotation(AvatarIKGoal.LeftHand, m_leftHand.rotation);
+
+            m_playerAnimator.SetIKPositionWeight(AvatarIKGoal.RightHand, m_curWeapon.m_rightHandWeight);
+            m_playerAnimator.SetIKRotationWeight(AvatarIKGoal.RightHand, m_curWeapon.m_rightHandWeight);
+            m_playerAnimator.SetIKPosition(AvatarIKGoal.RightHand, m_rightHand.position);
+            m_playerAnimator.SetIKRotation(AvatarIKGoal.RightHand, m_rightHand.rotation);
+
+            m_rightElbowWeight = Mathf.Lerp(m_rightElbowWeight, (m_stateController.m_aiming) ? 1.0f : 0.0f, 0.1f);
+            m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, m_rightElbowWeight);
+            m_playerAnimator.SetIKHintPosition(AvatarIKHint.RightElbow, m_rightElbow.position);
+
+            m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, m_rightElbowWeight);
+            m_playerAnimator.SetIKHintPosition(AvatarIKHint.LeftElbow, m_leftElbow.position);
         }
+        else
+        {
+            m_playerAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0.0f);
+            m_playerAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0.0f);
 
-        //Aim Camera
-        CamAim();
+            m_playerAnimator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0.0f);
+            m_playerAnimator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0.0f);
 
-        //Hold Weapon
-        m_playerAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, m_curWeapon.m_leftHandWeight);
-        m_playerAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, m_curWeapon.m_leftHandWeight);
-        m_playerAnimator.SetIKPosition(AvatarIKGoal.LeftHand, m_leftHand.position);
-        m_playerAnimator.SetIKRotation(AvatarIKGoal.LeftHand, m_leftHand.rotation);
+            m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, 0.0f);
 
-        m_playerAnimator.SetIKPositionWeight(AvatarIKGoal.RightHand, m_curWeapon.m_rightHandWeight);
-        m_playerAnimator.SetIKRotationWeight(AvatarIKGoal.RightHand, m_curWeapon.m_rightHandWeight);
-        m_playerAnimator.SetIKPosition(AvatarIKGoal.RightHand, m_rightHand.position);
-        m_playerAnimator.SetIKRotation(AvatarIKGoal.RightHand, m_rightHand.rotation);
-
-        m_rightElbowWeight = Mathf.Lerp(m_rightElbowWeight, (m_stateController.m_aiming) ? 1.0f : 0.0f, 0.1f);
-        m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, m_rightElbowWeight);
-        m_playerAnimator.SetIKHintPosition(AvatarIKHint.RightElbow, m_rightElbow.position);
-
-        m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, m_rightElbowWeight);
-        m_playerAnimator.SetIKHintPosition(AvatarIKHint.LeftElbow, m_leftElbow.position);
+            m_playerAnimator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, 0.0f);
+        }        
     }
 
     void BodyAim ()
@@ -334,7 +419,7 @@ public class PlayerWeaponController : MonoBehaviour
     
     void WeaponAim ()
     {
-        if (m_stateController.m_aiming)
+        if (m_stateController.m_aiming && !m_holstered)
         {
             Vector3 wepPosOffset = m_weapons[m_curWeaponNum].transform.position - m_weaponHolder.transform.position;
 
@@ -486,16 +571,38 @@ public class PlayerWeaponController : MonoBehaviour
 
     public void ReloadWeapon ()
     {
-        m_curWeapon.Reload();
+        if (!m_holstered)
+        {
+            m_curWeapon.Reload();
+        }
     }
 
     public void HolsterWeapon ()
     {
         Debug.Log("HolsterWeapon()");
+        m_weapons[m_curWeaponNum].SetActive(false);       
     }
 
     public void SelectWeapon (int num)
     {
         Debug.Log("SelectWeapon");
+
+        if (num < 0 && num > m_weapons.Count - 1)
+        {
+            return;
+        }
+
+        if (num != m_curWeaponNum)
+        {
+            m_weapons[m_curWeaponNum].SetActive(false);
+            m_curWeaponNum = num;
+            m_weapons[m_curWeaponNum].SetActive(true);
+            m_curWeapon = m_weapons[m_curWeaponNum].GetComponent<Weapon>();
+
+            m_leftHand = m_curWeapon.m_leftHand;
+            m_rightHand = m_curWeapon.m_rightHand;
+            m_leftElbow = m_curWeapon.m_leftElbow;
+            m_rightElbow = m_curWeapon.m_rightElbow;
+        }
     }
 }

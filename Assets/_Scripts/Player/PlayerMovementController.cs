@@ -37,7 +37,7 @@ public class PlayerMovementController : MonoBehaviour
         
     }
     
-    public void Move (float v, float h, bool fire1, bool fire2, bool reload, bool jump, bool crouch, bool walk, bool sprint)
+    public void Move (float v, float h, bool fire1, bool fire2, bool reload, bool jump, bool crouch, bool walk, bool sprint, bool holster, int wepNum)
     {
         // Update player state info        
         m_stateController.m_grounded = CheckGround();
@@ -48,6 +48,8 @@ public class PlayerMovementController : MonoBehaviour
         m_stateController.m_crouch = crouch;
         m_stateController.m_walk = walk && !crouch && !sprint; //crouching and or sprint cancels walk
         m_stateController.m_sprint = sprint && !fire2 && !crouch; //aiming and/or crouching cancels sprint
+        m_stateController.m_holster = holster;
+        m_stateController.m_wepNum = wepNum;
 
         // Check if sliding
         m_stateController.m_slide = (m_stateController.m_move.magnitude > 1.0f) && crouch;
