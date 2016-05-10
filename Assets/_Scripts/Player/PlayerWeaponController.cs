@@ -12,12 +12,15 @@ public class Weapon : MonoBehaviour
          
     public Transform m_leftHand, m_rightHand, m_leftElbow, m_rightElbow, m_firePos;
 
-    public GameObject m_weaponHUD;       
+    public GameObject m_weaponModel, m_weaponHUD;       
 
     public float m_projectileSpeed = 3.0f;
     public int m_magazineSize = 100, m_rounds = 1000;
 
     public AudioClip m_fireNoise, m_emptyNoise, m_reloadNoise;
+
+    [HideInInspector]
+    public Animator m_wepAnimator;
 
     [HideInInspector]
     public float m_leftHandWeight = 1.0f, m_rightHandWeight = 1.0f;
@@ -27,7 +30,6 @@ public class Weapon : MonoBehaviour
 
     private AudioSource m_audioSource;
     private ObjectPool m_ammo;
-    private Animator m_wepAnimator;
     
     private bool m_aiming, m_firing, m_fired, m_reloading, m_reloaded, m_crouching, m_sprinting, m_sliding, m_idle;    
 
@@ -46,7 +48,8 @@ public class Weapon : MonoBehaviour
     {
         //Debug.Log("rebinding animator!");
 
-        m_wepAnimator.Rebind();
+        //m_wepAnimator.Rebind();
+        //m_wepAnimator.StartPlayback();
     }
 
     public virtual void Update ()
@@ -182,11 +185,6 @@ public class Weapon : MonoBehaviour
         m_wepAnimator.SetBool("Sliding", sliding);
         m_wepAnimator.SetBool("Idle", idle);        
     }
-
-    public void OnAnimatorIK ()
-    {
-        //aim gun
-    }
 }
 
 [RequireComponent(typeof(Animator))]
@@ -194,7 +192,7 @@ public class PlayerWeaponController : MonoBehaviour
 {   
     public GameObject m_weaponHolder, m_cam;
     public float m_maxPan = 60.0f, m_weaponAimSpeed = 0.1f, m_camAimDist = 1.0f;
-    public Vector3 m_camTarAimPosOffset = new Vector3(0.2f, 0.0f, 0.0f);
+    public Vector3 m_camTarAimPosOffset = new Vector3(0.2f, 0.0f, 0.0f), m_camTarCrouchAimPosOffset;
 
     [System.Serializable]
     public class PlayerHUD
@@ -222,7 +220,7 @@ public class PlayerWeaponController : MonoBehaviour
     private float m_rightElbowWeight, m_lastCamDist;
     private int m_curWeaponNum = 0;
 
-    private bool m_holstered = false;
+    private bool m_holstered = false, m_holsterLock = false;
 
 	// Use this for initialization
 	void Awake ()
@@ -261,15 +259,21 @@ public class PlayerWeaponController : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        if (m_stateController.m_holster && !m_holstered)
+        if (m_stateController.m_holster && !m_holstered && !m_holsterLock)
         {
             HolsterWeapon();
             m_holstered = true;
+            m_holsterLock = true;
         }
-        else if (m_stateController.m_holster && m_holstered)
+        else if (m_stateController.m_holster && m_holstered && !m_holsterLock) 
         {
             SelectWeapon(m_stateController.m_wepNum);
             m_holstered = false;
+            m_holsterLock = true;
+        }
+        else if (!m_stateController.m_holster && m_holsterLock)
+        {
+            m_holsterLock = false;
         }
 
         if (m_curWeaponNum != m_stateController.m_wepNum)
@@ -326,7 +330,7 @@ public class PlayerWeaponController : MonoBehaviour
     void OnAnimatorIK (int layer)
     {    
         if (!m_holstered)
-        {
+        {   
             //Aiming layer    
             if (layer == 1)
             {
@@ -423,6 +427,12 @@ public class PlayerWeaponController : MonoBehaviour
         {
             Vector3 wepPosOffset = m_weapons[m_curWeaponNum].transform.position - m_weaponHolder.transform.position;
 
+            //Debug.Log(m_weapons[m_curWeaponNum].transform.position.ToString());
+
+#if UNITY_EDITOR
+            Debug.DrawLine(m_weaponHolder.transform.position, m_weaponHolder.transform.position + wepPosOffset);
+#endif
+
             Vector3 toTar = ((m_camController.m_hit.point + wepPosOffset) - m_weaponHolder.transform.position).normalized;
 
             float turnCheck = Vector3.Dot(toTar, transform.forward);
@@ -432,11 +442,12 @@ public class PlayerWeaponController : MonoBehaviour
                 Quaternion deltaRot = tarRot * Quaternion.Inverse(m_weaponHolder.transform.rotation);
 
                 //Debug.Log("tarRot == " + tarRot.eulerAngles.ToString() + " ; deltaRot == " + deltaRot.eulerAngles.ToString());
-                //Debug.Log("transform.rotation == " + transform.rotation.eulerAngles.ToString());
-
+                
                 Vector3 rottedOffset = deltaRot * wepPosOffset;
 
                 m_weapons[m_curWeaponNum].transform.position = m_weaponHolder.transform.position + rottedOffset;
+
+                //Debug.Log(m_weapons[m_curWeaponNum].transform.position.ToString());
 
                 Vector3 wepToTar = (m_camController.m_hit.point - m_weapons[m_curWeaponNum].transform.position).normalized;
                 Quaternion wepTarRot = Quaternion.LookRotation(wepToTar);
@@ -449,8 +460,6 @@ public class PlayerWeaponController : MonoBehaviour
             }
             else
             {
-                //Debug.Log("turnCheck < 0.0");
-
                 Quaternion tarRot = Quaternion.LookRotation(toTar);
                 Quaternion deltaRot = tarRot * Quaternion.Inverse(m_weaponHolder.transform.rotation);
 
@@ -481,60 +490,18 @@ public class PlayerWeaponController : MonoBehaviour
                     tilt = Mathf.Clamp(tilt, -45.0f, 45.0f);
                 }
 
-                //Debug.Log("pan == " + pan.ToString());
-
                 deltaRot = Quaternion.Euler(tilt, pan, deltaRot.eulerAngles.z);
-
-                //Debug.Log("tarRot == " + tarRot.eulerAngles.ToString() + " ; deltaRot == " + deltaRot.eulerAngles.ToString());
-                //Debug.Log("transform.rotation == " + transform.rotation.eulerAngles.ToString());
-
+                
                 Vector3 rottedOffset = deltaRot * wepPosOffset;
 
                 m_weapons[m_curWeaponNum].transform.position = m_weaponHolder.transform.position + rottedOffset;
-
                 
                 Vector3 wepToTar = (m_camController.m_hit.point - m_weapons[m_curWeaponNum].transform.position).normalized;
                 
                 Quaternion wepTarRot = Quaternion.LookRotation(wepToTar);
 
-                /*
-                //Debug.Log("wepTarRot == " + wepTarRot.eulerAngles.ToString());
-                if (wepTarRot.eulerAngles.y <= 180.0f)
-                {
-                    //Debug.Log("gun aiming right!");
-                    pan = wepTarRot.eulerAngles.y;
-                    pan = Mathf.Clamp(pan, -90.0f, 90.0f);
-                }
-                else
-                {
-                    //Debug.Log("gun aiming left!");
-                    pan = wepTarRot.eulerAngles.y - 360.0f;
-                    pan = Mathf.Clamp(pan, -90.0f, 0.0f);
-                    pan += 360.0f;
-                }
-
-                wepTarRot = Quaternion.Euler(wepTarRot.eulerAngles.x, pan, wepTarRot.eulerAngles.z);
-                */
-                /*
-                if (wepTarRot.eulerAngles.x <= 180.0f)
-                {
-                    //Debug.Log("gun aiming down!");
-                    tilt = wepTarRot.eulerAngles.x;
-                    tilt = Mathf.Clamp(tilt, -90.0f, 90.0f);
-                }
-                else
-                {
-                    //Debug.Log("gun aiming up!");
-                    tilt = wepTarRot.eulerAngles.x - 360.0f;
-                    tilt = Mathf.Clamp(tilt, -90.0f, 90.0f);
-                }
-
-                wepTarRot = Quaternion.Euler(tilt, pan, wepTarRot.eulerAngles.z);
-                */
-
                 m_weapons[m_curWeaponNum].transform.rotation = wepTarRot;
-                
-
+               
 #if UNITY_EDITOR
                 Debug.DrawLine(m_weapons[m_curWeaponNum].transform.position, m_weapons[m_curWeaponNum].transform.position + wepToTar, Color.red);
 #endif
@@ -547,6 +514,11 @@ public class PlayerWeaponController : MonoBehaviour
         if (m_stateController.m_aiming)
         {
             m_camController.m_target.transform.localPosition = m_camTarStartLocalPos + m_camTarAimPosOffset;
+
+            if (m_stateController.m_crouch)
+            {
+                m_camController.m_target.transform.localPosition += m_camTarCrouchAimPosOffset;
+            }
             
             if (m_camController.GetCamDist() != m_camAimDist)
             {
@@ -578,31 +550,40 @@ public class PlayerWeaponController : MonoBehaviour
     }
 
     public void HolsterWeapon ()
-    {
-        Debug.Log("HolsterWeapon()");
-        m_weapons[m_curWeaponNum].SetActive(false);       
+    {        
+        m_curWeapon.m_weaponModel.SetActive(false);
+        m_curWeapon.enabled = false;
     }
 
     public void SelectWeapon (int num)
     {
-        Debug.Log("SelectWeapon");
-
+        //Out of selection range
         if (num < 0 && num > m_weapons.Count - 1)
         {
             return;
         }
 
+        //Switch weapon
         if (num != m_curWeaponNum)
         {
-            m_weapons[m_curWeaponNum].SetActive(false);
+            HolsterWeapon();
             m_curWeaponNum = num;
             m_weapons[m_curWeaponNum].SetActive(true);
             m_curWeapon = m_weapons[m_curWeaponNum].GetComponent<Weapon>();
-
+           
+            m_curWeapon.m_weaponModel.SetActive(true);
+            m_curWeapon.enabled = true;
+            
             m_leftHand = m_curWeapon.m_leftHand;
             m_rightHand = m_curWeapon.m_rightHand;
             m_leftElbow = m_curWeapon.m_leftElbow;
             m_rightElbow = m_curWeapon.m_rightElbow;
+        }
+        //Draw weapon
+        else if (!m_curWeapon.m_weaponModel.activeInHierarchy)
+        {
+            m_curWeapon.m_weaponModel.SetActive(true);
+            m_curWeapon.enabled = true;            
         }
     }
 }
