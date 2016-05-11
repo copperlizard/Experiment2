@@ -10,23 +10,28 @@ ModelImporter:
     100004: Base
     100006: RefCylinder
     100008: Sight
+    100010: Magazine
     400000: //RootNode
     400002: Barrel
     400004: Base
     400006: RefCylinder
     400008: Sight
+    400010: Magazine
     2300000: Barrel
     2300002: Base
     2300004: RefCylinder
     2300006: Sight
+    2300008: Magazine
     3300000: Barrel
     3300002: Base
     3300004: RefCylinder
     3300006: Sight
+    3300008: Magazine
     4300000: Barrel
     4300002: Sight
     4300004: Base
     4300006: RefCylinder
+    4300008: Magazine
     7400000: Default Take
     9500000: //RootNode
   materials:

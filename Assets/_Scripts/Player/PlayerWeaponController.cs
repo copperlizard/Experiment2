@@ -14,7 +14,7 @@ public class Weapon : MonoBehaviour
 
     public GameObject m_weaponModel, m_weaponHUD;       
 
-    public float m_projectileSpeed = 3.0f;
+    public float m_projectileSpeed = 3.0f, m_leftHandWeight = 1.0f, m_rightHandWeight = 1.0f;
     public int m_magazineSize = 100, m_rounds = 1000;
 
     public AudioClip m_fireNoise, m_emptyNoise, m_reloadNoise;
@@ -23,15 +23,15 @@ public class Weapon : MonoBehaviour
     public Animator m_wepAnimator;
 
     [HideInInspector]
-    public float m_leftHandWeight = 1.0f, m_rightHandWeight = 1.0f;
+    public int m_thisMagazine;
 
     [HideInInspector]
-    public int m_thisMagazine;
+    public bool m_aiming, m_firing, m_fired, m_reloading, m_reloaded, m_crouching, m_sprinting, m_sliding, m_idle;
 
     private AudioSource m_audioSource;
     private ObjectPool m_ammo;
     
-    private bool m_aiming, m_firing, m_fired, m_reloading, m_reloaded, m_crouching, m_sprinting, m_sliding, m_idle;    
+     
 
     void Awake ()
     {
