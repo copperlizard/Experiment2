@@ -17,6 +17,9 @@ public class Weapon : MonoBehaviour
     public float m_projectileSpeed = 3.0f, m_leftHandWeight = 1.0f, m_rightHandWeight = 1.0f;
     public int m_magazineSize = 100, m_rounds = 1000;
 
+    [HideInInspector]
+    public AudioSource m_audioSource;
+
     public AudioClip m_fireNoise, m_emptyNoise, m_reloadNoise;
 
     [HideInInspector]
@@ -28,10 +31,7 @@ public class Weapon : MonoBehaviour
     [HideInInspector]
     public bool m_aiming, m_firing, m_fired, m_reloading, m_reloaded, m_crouching, m_sprinting, m_sliding, m_idle;
 
-    private AudioSource m_audioSource;
     private ObjectPool m_ammo;
-    
-     
 
     void Awake ()
     {
@@ -80,7 +80,7 @@ public class Weapon : MonoBehaviour
         }        
     }
 
-    IEnumerator Firing ()
+    public virtual IEnumerator Firing ()
     {
         //Wait for animator transition
         while (!m_wepAnimator.GetCurrentAnimatorStateInfo(0).IsName("GunFire"))
@@ -133,7 +133,7 @@ public class Weapon : MonoBehaviour
         }      
     }
 
-    IEnumerator Reloading ()
+    public virtual IEnumerator Reloading ()
     {
         //Wait for animator transition
         while (!m_wepAnimator.GetCurrentAnimatorStateInfo(0).IsName("GunReload"))
@@ -161,7 +161,7 @@ public class Weapon : MonoBehaviour
     
     public virtual void Reload ()
     {
-        if (!m_reloaded)
+        if (!m_reloaded && m_rounds > 0)
         {
             m_reloaded = true;
             m_wepAnimator.SetTrigger("Reload");
@@ -570,9 +570,12 @@ public class PlayerWeaponController : MonoBehaviour
             m_curWeaponNum = num;
             m_weapons[m_curWeaponNum].SetActive(true);
             m_curWeapon = m_weapons[m_curWeaponNum].GetComponent<Weapon>();
-           
-            m_curWeapon.m_weaponModel.SetActive(true);
-            m_curWeapon.enabled = true;
+
+            if (!m_holstered)
+            {
+                m_curWeapon.m_weaponModel.SetActive(true);
+                m_curWeapon.enabled = true;
+            }
             
             m_leftHand = m_curWeapon.m_leftHand;
             m_rightHand = m_curWeapon.m_rightHand;

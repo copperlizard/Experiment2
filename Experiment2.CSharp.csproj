@@ -72,6 +72,7 @@
     <Compile Include="Assets\_Scripts\Player\UserControlInput.cs" />
     <Compile Include="Assets\_Scripts\Weapons\GravityPistol.cs" />
     <Compile Include="Assets\_Scripts\Weapons\GravityPistolShot.cs" />
+    <Compile Include="Assets\_Scripts\Weapons\GrenadeLauncher.cs" />
     <Compile Include="Assets\_Scripts\Weapons\LazerAssaultRifle.cs" />
     <Compile Include="Assets\_Scripts\Weapons\LazerAssaultRifleLazer.cs" />
     <Compile Include="Assets\_Scripts\Weapons\TestWeapon.cs" />
