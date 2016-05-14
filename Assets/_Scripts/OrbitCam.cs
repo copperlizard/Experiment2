@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
 public class OrbitCam : MonoBehaviour
 {
@@ -8,8 +7,7 @@ public class OrbitCam : MonoBehaviour
     public RaycastHit m_hit; //player target
     public float m_minDist = 0.0f, m_maxDist = 100.0f, m_startDist = 5.0f, m_minTilt, m_maxTilt, m_hidePlayerDist, m_rotSpeed, m_damp, m_fudge;
     public bool m_HideCursor = true;
-    public List<LayerMask> m_ignoreIntersect = new List<LayerMask>();
-
+    
     private SkinnedMeshRenderer[] m_meshRenderers;
     private RaycastHit m_interAt;
     private Quaternion m_rot;
@@ -40,7 +38,7 @@ public class OrbitCam : MonoBehaviour
             Debug.Log("no player found! (ensure player tagged player)");
         }
 
-        m_meshRenderers = player.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+        m_meshRenderers = player.GetComponentsInChildren<SkinnedMeshRenderer>(true);        
 	}
 	
 	// Update is called once per frame
@@ -142,49 +140,22 @@ public class OrbitCam : MonoBehaviour
 
     Vector3 IntersectCheck(Vector3 target)
     {
-        //If intersection (cast ray from player to camera)
-        if (Physics.Raycast(m_target.transform.position, target - m_target.transform.position, out m_interAt, m_dist))
+        //If intersection (cast ray from camera to player)
+        if (Physics.Raycast(m_target.transform.position, target - m_target.transform.position, out m_interAt, m_dist, ~LayerMask.GetMask("Player")))
         {
-            //Ignoring objects tagged player
-            if (m_interAt.rigidbody != null)
+            //Debug.Log("INTERSECTION!!! " + m_interAt.collider.gameObject.tag.ToString() + " ; " + LayerMask.LayerToName(m_interAt.collider.gameObject.layer));
+            
+            if (m_interAt.collider.gameObject.tag == "Player")
             {
-                if (m_interAt.rigidbody.gameObject.tag == "Player")
-                {
-                    return target;
-                }
-            }         
+                return target;
+            } 
+               
 
 #if UNITY_EDITOR
             Debug.DrawLine(m_target.transform.position, m_interAt.point, Color.yellow, 0.01f, true);
-#endif
+#endif      
 
-            float tDist = 0.0f;
-            
-            //If ignoring object layers...            
-            if(m_ignoreIntersect.Count > 0)
-            {
-                bool ignore = false;
-                for (int i = 0; i < m_ignoreIntersect.Count; i++)
-                {
-                    if(m_interAt.collider.gameObject.layer == m_ignoreIntersect[i])
-                    {
-                        //If on any ignored layer
-                        ignore = true;
-                    }
-                }
-
-                //If not on ignored layer
-                if(!ignore)
-                {                     
-                    tDist = Mathf.Clamp(m_interAt.distance - m_fudge, m_minDist, m_maxDist);
-                    target = (m_rot * new Vector3(0.0f, 0.0f, -tDist)) + m_target.transform.position;
-                }
-            }
-            else
-            {                 
-                tDist = Mathf.Clamp(m_interAt.distance - m_fudge, m_minDist, m_maxDist);
-                target = (m_rot * new Vector3(0.0f, 0.0f, -tDist)) + m_target.transform.position;
-            }            
+            target = m_interAt.point;
         }
 
         return target;

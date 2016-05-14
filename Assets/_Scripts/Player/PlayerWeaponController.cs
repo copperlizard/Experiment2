@@ -95,6 +95,7 @@ public class Weapon : MonoBehaviour
 
         GameObject shot = m_ammo.GetObject();
         shot.transform.position = m_firePos.transform.position;
+
         shot.transform.rotation = Quaternion.LookRotation(m_firePos.transform.forward);
 
         Rigidbody shotRB = shot.GetComponent<Rigidbody>();

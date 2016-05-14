@@ -55,7 +55,7 @@ public class LazerAssaultRifleLazer : MonoBehaviour
     }
 
     void OnCollisionEnter (Collision other)
-    {
+    {      
         m_projectile.SetActive(false);
         m_rb.detectCollisions = false;
         m_rb.Sleep();

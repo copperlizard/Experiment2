@@ -79,7 +79,7 @@ public class PlayerMovementController : MonoBehaviour
 #if UNITY_EDITOR
             Debug.DrawLine(startPos, startPos + Vector3.up * m_headCheckDist, Color.green);
 #endif
-            if(Physics.Raycast(startPos, Vector3.up, m_headCheckDist))
+            if(Physics.Raycast(startPos, Vector3.up, m_headCheckDist, LayerMask.NameToLayer("Player")))
             {
                 m_stateController.m_crouch = true;
                 m_stateController.m_walk = false;
