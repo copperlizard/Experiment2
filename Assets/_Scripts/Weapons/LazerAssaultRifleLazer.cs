@@ -9,7 +9,7 @@ public class LazerAssaultRifleLazer : MonoBehaviour
 
     public AudioClip m_flightSound, m_hitSound;
 
-    public float m_projectileForce = 3.0f;
+    public float m_projectileForce = 3.0f, m_damage = 0.1f;
 
     private Rigidbody m_rb;
     private AudioSource m_audioSource;
@@ -68,6 +68,16 @@ public class LazerAssaultRifleLazer : MonoBehaviour
         if (other.rigidbody != null)
         {
             other.rigidbody.AddForceAtPosition(transform.forward * m_projectileForce, other.contacts[0].point);
+        }
+
+        if (other.gameObject.tag == "Enemy") //add player tag check when you add player health!!!
+        {
+            Health enemyHealth = other.gameObject.GetComponent<Health>();
+
+            if (enemyHealth != null)
+            {
+                enemyHealth.TakeDamage(m_damage);
+            }
         }
 
         StartCoroutine(DeactivateTimer(0.05f, m_hitEffect));

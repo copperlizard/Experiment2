@@ -6,7 +6,7 @@ public class GrenadeLauncher : Weapon
 
     private bool m_fireLock = false, m_reloadDone = true;
 
-    public virtual void Update() //Single shot mod
+    public override void Update() //Single shot mod
     {
         if (m_aiming)
         {
@@ -39,7 +39,7 @@ public class GrenadeLauncher : Weapon
         }
     }
 
-    public virtual void Fire()
+    public override void Fire()
     {
         if (!m_fired && m_thisMagazine > 0)
         {
@@ -93,7 +93,7 @@ public class GrenadeLauncher : Weapon
         }
     }
 
-    public virtual void Reload()
+    public override void Reload()
     {
         if (!m_reloaded && m_rounds > 0)
         {

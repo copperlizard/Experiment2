@@ -550,7 +550,12 @@ public class PlayerWeaponController : MonoBehaviour
     }
 
     public void HolsterWeapon ()
-    {        
+    {
+        if (m_curWeapon.m_weaponHUD.activeInHierarchy)
+        {
+            m_curWeapon.m_weaponHUD.SetActive(false);
+        }
+                
         m_curWeapon.m_weaponModel.SetActive(false);
         m_curWeapon.enabled = false;
     }

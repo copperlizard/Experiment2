@@ -63,6 +63,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\_Scripts\Health.cs" />
+    <Compile Include="Assets\_Scripts\HealthCapsuleShowHealth.cs" />
     <Compile Include="Assets\_Scripts\ObjectPool.cs" />
     <Compile Include="Assets\_Scripts\OrbitCam.cs" />
     <Compile Include="Assets\_Scripts\Player\PlayerAnimationController.cs" />
@@ -73,6 +75,7 @@
     <Compile Include="Assets\_Scripts\Weapons\GravityPistol.cs" />
     <Compile Include="Assets\_Scripts\Weapons\GravityPistolShot.cs" />
     <Compile Include="Assets\_Scripts\Weapons\GrenadeLauncher.cs" />
+    <Compile Include="Assets\_Scripts\Weapons\GrenadeLauncherGrenade.cs" />
     <Compile Include="Assets\_Scripts\Weapons\LazerAssaultRifle.cs" />
     <Compile Include="Assets\_Scripts\Weapons\LazerAssaultRifleLazer.cs" />
     <Compile Include="Assets\_Scripts\Weapons\TestWeapon.cs" />

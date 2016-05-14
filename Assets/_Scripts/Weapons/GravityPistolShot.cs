@@ -10,7 +10,7 @@ public class GravityPistolShot : MonoBehaviour
     public AudioClip m_flightSound, m_explosionSound, m_implosionSound;
 
     public float m_explosionForce, m_explosionRadius, m_explosionDuration, m_implosionForce, m_implosionRadius, m_implosionDuration, 
-        m_upMod, m_detonateTime, m_maxLife, m_growthRate;
+        m_upMod, m_detonateTime, m_growthRate;
 
     private Rigidbody m_rb;
     private AudioSource m_audioSource;
@@ -43,8 +43,7 @@ public class GravityPistolShot : MonoBehaviour
         m_detonated = false;
 
         transform.localScale = Vector3.one * 0.1f;
-
-        StartCoroutine(DeactivateTimer(m_maxLife, gameObject));
+        
         StartCoroutine(Grow());
         StartCoroutine(DetonateTimer(m_detonateTime));
         m_projectile.SetActive(true);

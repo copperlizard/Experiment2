@@ -5,7 +5,7 @@ public class GravityPistol : Weapon
 {
     private bool m_fireLock = false;
 
-    public virtual void Update() //Single shot mod
+    public override void Update() //Single shot mod
     {
         if (m_aiming)
         {
