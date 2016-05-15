@@ -9,7 +9,7 @@ public class GravityPistolShot : MonoBehaviour
 
     public AudioClip m_flightSound, m_explosionSound, m_implosionSound;
 
-    public float m_explosionForce, m_explosionRadius, m_explosionDuration, m_implosionForce, m_implosionRadius, m_implosionDuration, 
+    public float m_explosionForce, m_explosionRadius, m_explosionDamage, m_explosionDuration, m_implosionForce, m_implosionRadius, m_implosionDamage, m_implosionDuration, 
         m_upMod, m_detonateTime, m_growthRate;
 
     private Rigidbody m_rb;
@@ -117,6 +117,13 @@ public class GravityPistolShot : MonoBehaviour
             if (hitColliders[i].attachedRigidbody != null)
             {
                 hitColliders[i].attachedRigidbody.AddExplosionForce(m_explosionForce, transform.position, m_explosionRadius, m_upMod, ForceMode.Impulse);
+
+                Health tarHealth = hitColliders[i].gameObject.GetComponent<Health>();
+                if (tarHealth != null)
+                {
+                    float dist = Mathf.Clamp((hitColliders[i].transform.position - transform.position).magnitude, 0.0f, m_explosionRadius);
+                    tarHealth.TakeExplosionDamage(m_explosionDamage * (1.0f - (dist / m_explosionRadius)));
+                }
             }
         }
 
@@ -139,6 +146,13 @@ public class GravityPistolShot : MonoBehaviour
             if (hitColliders[i].attachedRigidbody != null)
             {
                 hitColliders[i].attachedRigidbody.AddExplosionForce(-m_implosionForce, transform.position, m_implosionRadius, m_upMod, ForceMode.Impulse);
+
+                Health tarHealth = hitColliders[i].gameObject.GetComponent<Health>();
+                if (tarHealth != null)
+                {
+                    float dist = Mathf.Clamp((hitColliders[i].transform.position - transform.position).magnitude, 0.0f, m_implosionRadius);
+                    tarHealth.TakeExplosionDamage(m_implosionDamage * (1.0f - (dist / m_implosionRadius)));
+                }
             }
         }
 

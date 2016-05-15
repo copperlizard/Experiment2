@@ -456,7 +456,7 @@ public class PlayerWeaponController : MonoBehaviour
                 m_weapons[m_curWeaponNum].transform.rotation = wepTarRot;
 
 #if UNITY_EDITOR
-                Debug.DrawLine(m_weapons[m_curWeaponNum].transform.position, m_weapons[m_curWeaponNum].transform.position + wepToTar, Color.red);
+                Debug.DrawLine(m_curWeapon.m_firePos.transform.position, m_curWeapon.m_firePos.transform.position + (m_curWeapon.m_firePos.forward * 100.0f), Color.red);
 #endif
             }
             else

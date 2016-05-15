@@ -8,7 +8,7 @@ public class GrenadeLauncherGrenade : MonoBehaviour
 
     public AudioClip m_timerSound, m_collisonSound, m_explosionSound;
 
-    public float m_explosionForce, m_explosionRadius, m_upMod, m_explosionTime, m_detonateTime, m_agitatedTimer;
+    public float m_explosionForce, m_explosionRadius, m_explosionDamage, m_upMod, m_explosionTime, m_detonateTime, m_agitatedTimer;
 
     private Rigidbody m_rb;
     private AudioSource m_audioSource;
@@ -87,7 +87,22 @@ public class GrenadeLauncherGrenade : MonoBehaviour
         {
             if (hitColliders[i].attachedRigidbody != null)
             {
-                hitColliders[i].attachedRigidbody.AddExplosionForce(m_explosionForce, transform.position, m_explosionRadius, m_upMod, ForceMode.Impulse);
+                GrenadeLauncherGrenade otherGrenade = hitColliders[i].GetComponent<GrenadeLauncherGrenade>();
+                if (otherGrenade != null)
+                {
+                    otherGrenade.Detonate();
+                }
+                else
+                {
+                    Health tarHealth = hitColliders[i].gameObject.GetComponent<Health>();
+                    if (tarHealth != null)
+                    {
+                        float dist = Mathf.Clamp((hitColliders[i].transform.position - transform.position).magnitude, 0.0f, m_explosionRadius);
+                        tarHealth.TakeExplosionDamage(m_explosionDamage * (1.0f - (dist / m_explosionRadius)));
+                    }
+
+                    hitColliders[i].attachedRigidbody.AddExplosionForce(m_explosionForce, transform.position, m_explosionRadius, m_upMod, ForceMode.Impulse);
+                }
             }
         }
 

@@ -49,11 +49,7 @@ public class OrbitCam : MonoBehaviour
 
     // LateUpdate is called once per frame after Update
     void LateUpdate()
-    {
-        // Calculate m_rot
-        //m_rot = Quaternion.Euler(m_v * m_rotSpeed, Mathf.Clamp(m_h * m_rotSpeed, m_minTilt, m_maxTilt), 0.0f);  
-        //m_rot = Quaternion.Euler(m_v * m_rotSpeed, m_h * m_rotSpeed, 0.0f);
-        
+    {   
         float tilt;
         if (m_v * m_rotSpeed < 180.0f)
         {
@@ -123,7 +119,7 @@ public class OrbitCam : MonoBehaviour
         transform.rotation = m_rot;
 
         //Find "hit"
-        if(!Physics.Raycast(transform.position, transform.forward, out m_hit, m_maxDist, LayerMask.NameToLayer("Player")))
+        if(!Physics.Raycast(transform.position, transform.forward, out m_hit, m_maxDist, ~LayerMask.GetMask("Player")))
         {
             m_hit.point = transform.position + transform.forward * m_maxDist;
             m_hit.normal = Vector3.up;
@@ -142,14 +138,11 @@ public class OrbitCam : MonoBehaviour
     {
         //If intersection (cast ray from camera to player)
         if (Physics.Raycast(m_target.transform.position, target - m_target.transform.position, out m_interAt, m_dist, ~LayerMask.GetMask("Player")))
-        {
-            //Debug.Log("INTERSECTION!!! " + m_interAt.collider.gameObject.tag.ToString() + " ; " + LayerMask.LayerToName(m_interAt.collider.gameObject.layer));
-            
+        {   
             if (m_interAt.collider.gameObject.tag == "Player")
             {
                 return target;
-            } 
-               
+            }  
 
 #if UNITY_EDITOR
             Debug.DrawLine(m_target.transform.position, m_interAt.point, Color.yellow, 0.01f, true);

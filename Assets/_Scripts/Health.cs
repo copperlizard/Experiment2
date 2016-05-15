@@ -3,9 +3,9 @@ using System.Collections;
 
 public class Health : MonoBehaviour
 {
-    public float m_healthRegen;
+    public float m_healthRegen, m_damageMultiplier = 1.0f;
 
-    public bool m_regenHealth = true;
+    public bool m_regenHealth = false, m_takesExplosionDamage = false;
 
     private float m_health = 1.0f;
 
@@ -31,7 +31,15 @@ public class Health : MonoBehaviour
 
     public virtual void TakeDamage (float damage)
     {
-        m_health = Mathf.Clamp(m_health - damage, 0.0f, 1.0f);
+        m_health = Mathf.Clamp(m_health - (damage * m_damageMultiplier), 0.0f, 1.0f);
+    }
+
+    public virtual void TakeExplosionDamage(float damage)
+    {
+        if (m_takesExplosionDamage)
+        {
+            m_health = Mathf.Clamp(m_health - (damage * m_damageMultiplier), 0.0f, 1.0f);
+        }
     }
 
     public virtual void GainHealth (float healthGain)
