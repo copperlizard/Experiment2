@@ -16,7 +16,7 @@ public class OrbitCam : MonoBehaviour
     private bool m_playerHidden = false;
 
 	// Use this for initialization
-	void Start()
+	void Start ()
     {            
         m_dist = m_startDist;
         transform.position = m_target.transform.position + new Vector3(0.0f, 0.0f, -m_dist);
@@ -42,13 +42,13 @@ public class OrbitCam : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void Update()
+	void Update ()
     {
-        GetInput();
+        GetInput();  
 	}
 
     // LateUpdate is called once per frame after Update
-    void LateUpdate()
+    void LateUpdate ()
     {   
         float tilt;
         if (m_v * m_rotSpeed < 180.0f)
@@ -126,7 +126,7 @@ public class OrbitCam : MonoBehaviour
         }        
     }
 
-    void GetInput()
+    public void GetInput ()
     {
         bool aiming = Input.GetMouseButton(1);
         m_h += Input.GetAxis("Mouse X") * ((aiming) ? 0.5f : 1.0f);
@@ -134,7 +134,7 @@ public class OrbitCam : MonoBehaviour
         //m_d = Input.GetAxis("Mouse ScrollWheel");
     }
 
-    Vector3 IntersectCheck(Vector3 target)
+    Vector3 IntersectCheck (Vector3 target)
     {
         //If intersection (cast ray from camera to player)
         if (Physics.Raycast(m_target.transform.position, target - m_target.transform.position, out m_interAt, m_dist, ~LayerMask.GetMask("Player")))
@@ -154,18 +154,18 @@ public class OrbitCam : MonoBehaviour
         return target;
     }
 
-    public void SetCamDist(float dist)
+    public void SetCamDist (float dist)
     {
         m_dist = Mathf.Clamp(dist, m_minDist, m_maxDist);
     }
 
-    public float GetCamDist()
+    public float GetCamDist ()
     {
         return m_dist;
     }
 
 #if UNITY_EDITOR
-    void OnDrawGizmos()
+    void OnDrawGizmos ()
     {
         if (Application.isPlaying)
         {
@@ -175,7 +175,7 @@ public class OrbitCam : MonoBehaviour
     }
 #endif
 
-    float ClampAngle(float ang, float min, float max)
+    float ClampAngle (float ang, float min, float max)
     {
         if (ang < -360.0f)
         {

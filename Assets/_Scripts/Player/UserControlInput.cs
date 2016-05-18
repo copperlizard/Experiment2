@@ -6,6 +6,7 @@ public class UserControlInput : MonoBehaviour
 {
     private PlayerMovementController m_mover;
 
+
     private float m_v, m_h;
     private bool m_fire1, m_fire2, m_reload, m_jump, m_crouch, m_walk, m_sprint, m_holster;
     private int m_wepNum;
@@ -13,8 +14,8 @@ public class UserControlInput : MonoBehaviour
 	// Use this for initialization
 	void Start ()
     {
-        m_mover = GetComponent<PlayerMovementController>();
-	}
+        m_mover = GetComponent<PlayerMovementController>();        
+    }
 	
 	// Update is called once per frame
 	void Update ()

@@ -56,9 +56,12 @@ public class Weapon : MonoBehaviour
     {
         if (m_aiming)
         {
-            if (!m_weaponHUD.activeInHierarchy)
+            if (m_weaponHUD != null)
             {
-                m_weaponHUD.SetActive(true);
+                if (!m_weaponHUD.activeInHierarchy)
+                {
+                    m_weaponHUD.SetActive(true);
+                }
             }
             
             if (m_firing)
@@ -68,10 +71,13 @@ public class Weapon : MonoBehaviour
         }
         else
         {
-            if (m_weaponHUD.activeInHierarchy)
+            if (m_weaponHUD != null)
             {
-                m_weaponHUD.SetActive(false);
-            }            
+                if (m_weaponHUD.activeInHierarchy)
+                {
+                    m_weaponHUD.SetActive(false);
+                }
+            }           
         }
         
         if (m_reloading && m_thisMagazine < m_magazineSize)

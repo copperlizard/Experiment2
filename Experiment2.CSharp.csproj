@@ -63,7 +63,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\EnemyActivator.cs" />
     <Compile Include="Assets\_Scripts\Enemies\EnemySphere\EnemySphereController.cs" />
+    <Compile Include="Assets\_Scripts\Enemies\EnemySphere\EnemySphereWeaponController.cs" />
     <Compile Include="Assets\_Scripts\Health.cs" />
     <Compile Include="Assets\_Scripts\HealthCapsuleShowHealth.cs" />
     <Compile Include="Assets\_Scripts\ObjectPool.cs" />

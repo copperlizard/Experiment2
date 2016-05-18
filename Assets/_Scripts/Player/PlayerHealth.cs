@@ -4,12 +4,7 @@ using System.Collections;
 public class PlayerHealth : Health
 {
     public PlayerStateController m_stateController;
-
-    void Start ()
-    {
-        
-    }
-
+    
     public override void RegenerateHealth ()
     {
         m_stateController.m_playerHealth = Mathf.Clamp(m_stateController.m_playerHealth + (m_healthRegen * Time.deltaTime), 0.0f, 1.0f);
@@ -17,6 +12,8 @@ public class PlayerHealth : Health
 
     public override void TakeDamage (float damage)
     {
+        Debug.Log("player taking damage!!!");
+
         m_stateController.m_playerHealth = Mathf.Clamp(m_stateController.m_playerHealth - (damage * m_damageMultiplier), 0.0f, 1.0f);
     }
 

@@ -70,12 +70,21 @@ public class LazerAssaultRifleLazer : MonoBehaviour
             other.rigidbody.AddForceAtPosition(transform.forward * m_projectileForce, other.contacts[0].point);
         }
 
-        if (other.gameObject.tag == "Enemy") //add player tag check when you add player health!!!
+        if (other.gameObject.tag == "Enemy" || other.gameObject.tag == "Player") //add player tag check when you add player health!!!
         {
+            Debug.Log(other.gameObject.name);
+
+            if (other.gameObject.tag == "Player")
+            {
+                Debug.Log("hit player!");
+            }
+
             Health enemyHealth = other.gameObject.GetComponent<Health>();
 
             if (enemyHealth != null)
             {
+                Debug.Log("damage health!!!");
+
                 enemyHealth.TakeDamage(m_damage);
             }
         }
