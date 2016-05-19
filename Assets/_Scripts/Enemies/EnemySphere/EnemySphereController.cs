@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(Health))]
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemySphereController : MonoBehaviour
 {
     public GameObject m_target;
 
+    //private Health m_health;
     private NavMeshAgent m_navAgent;
     private NavMeshPath m_curPath;
     private NavMeshHit m_hit;
@@ -16,12 +18,14 @@ public class EnemySphereController : MonoBehaviour
 	void Start ()
     {
         m_navAgent = GetComponent<NavMeshAgent>();
+
+        //m_health = GetComponent<Health>();
 	}
 	
 	// Update is called once per frame
     void Update ()
     {
-
+        
     }
 
 	void FixedUpdate ()
@@ -71,8 +75,6 @@ public class EnemySphereController : MonoBehaviour
 
                 if (vel.magnitude <= 0.5f)
                 {
-                    Debug.Log("next corner!!!");
-
                     //Next corner in path
                     m_curCorner++;
 
@@ -82,10 +84,7 @@ public class EnemySphereController : MonoBehaviour
                 Move(vel.normalized);
             }
             else
-            {
-                Debug.Log("end of path!!!");
-
-                //End of path
+            {               
                 m_havePath = false;
             }
         }

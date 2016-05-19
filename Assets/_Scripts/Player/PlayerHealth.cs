@@ -12,8 +12,6 @@ public class PlayerHealth : Health
 
     public override void TakeDamage (float damage)
     {
-        Debug.Log("player taking damage!!!");
-
         m_stateController.m_playerHealth = Mathf.Clamp(m_stateController.m_playerHealth - (damage * m_damageMultiplier), 0.0f, 1.0f);
     }
 
