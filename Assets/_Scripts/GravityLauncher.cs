@@ -17,8 +17,13 @@ public class GravityLauncher : MonoBehaviour
 	
 	}
 
-    void OnTriggerEnter(Collider other)
+    void OnTriggerStay(Collider other)
     {
         Debug.Log("hello " + other.name);
+
+        if (other.attachedRigidbody != null)
+        {
+            other.attachedRigidbody.AddForce(transform.up * m_launcherForce);
+        }
     }
 }
