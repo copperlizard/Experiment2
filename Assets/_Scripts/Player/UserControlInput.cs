@@ -6,7 +6,6 @@ public class UserControlInput : MonoBehaviour
 {
     private PlayerMovementController m_mover;
 
-
     private float m_v, m_h;
     private bool m_fire1, m_fire2, m_reload, m_jump, m_crouch, m_walk, m_sprint, m_holster;
     private int m_wepNum;

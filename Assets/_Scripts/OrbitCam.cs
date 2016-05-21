@@ -8,15 +8,20 @@ public class OrbitCam : MonoBehaviour
     public float m_minDist = 0.0f, m_maxDist = 100.0f, m_startDist = 5.0f, m_minTilt, m_maxTilt, m_hidePlayerDist, m_rotSpeed, m_damp, m_fudge;
     public bool m_HideCursor = true;
     
-    private SkinnedMeshRenderer[] m_meshRenderers;
+    [HideInInspector]
+    public SkinnedMeshRenderer[] m_meshRenderers;
+
+    [HideInInspector]
+    public float m_dist;
+
     private RaycastHit m_interAt;
     private Quaternion m_rot;
     private Vector3 m_curVel = Vector3.zero;
-    private float m_h, m_v, m_d, m_dist;
+    private float m_h, m_v, m_d;
     private bool m_playerHidden = false;
 
 	// Use this for initialization
-	void Start ()
+	public virtual void Start ()
     {            
         m_dist = m_startDist;
         transform.position = m_target.transform.position + new Vector3(0.0f, 0.0f, -m_dist);
@@ -40,9 +45,9 @@ public class OrbitCam : MonoBehaviour
 
         m_meshRenderers = player.GetComponentsInChildren<SkinnedMeshRenderer>(true);        
 	}
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    public virtual void Update ()
     {
         GetInput();  
 	}
