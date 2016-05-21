@@ -79,6 +79,7 @@
     <Compile Include="Assets\_Scripts\Player\PlayerStateController.cs" />
     <Compile Include="Assets\_Scripts\Player\PlayerWeaponController.cs" />
     <Compile Include="Assets\_Scripts\Player\UserControlInput.cs" />
+    <Compile Include="Assets\_Scripts\ResetSwitch.cs" />
     <Compile Include="Assets\_Scripts\Weapons\GravityPistol.cs" />
     <Compile Include="Assets\_Scripts\Weapons\GravityPistolShot.cs" />
     <Compile Include="Assets\_Scripts\Weapons\GrenadeLauncher.cs" />

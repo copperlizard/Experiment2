@@ -119,7 +119,7 @@ public class OrbitCam : MonoBehaviour
         transform.rotation = m_rot;
 
         //Find "hit"
-        if(!Physics.Raycast(transform.position, transform.forward, out m_hit, m_maxDist, ~LayerMask.GetMask("Player")))
+        if(!Physics.Raycast(transform.position, transform.forward, out m_hit, m_maxDist, ~LayerMask.GetMask("Player", "Ignore Raycast")))
         {
             m_hit.point = transform.position + transform.forward * m_maxDist;
             m_hit.normal = Vector3.up;
@@ -137,13 +137,8 @@ public class OrbitCam : MonoBehaviour
     Vector3 IntersectCheck (Vector3 target)
     {
         //If intersection (cast ray from camera to player)
-        if (Physics.Raycast(m_target.transform.position, target - m_target.transform.position, out m_interAt, m_dist, ~LayerMask.GetMask("Player")))
+        if (Physics.Raycast(m_target.transform.position, target - m_target.transform.position, out m_interAt, m_dist, ~LayerMask.GetMask("Player", "Ignore Raycast")))
         {   
-            if (m_interAt.collider.gameObject.tag == "Player")
-            {
-                return target;
-            }  
-
 #if UNITY_EDITOR
             Debug.DrawLine(m_target.transform.position, m_interAt.point, Color.yellow, 0.01f, true);
 #endif      
