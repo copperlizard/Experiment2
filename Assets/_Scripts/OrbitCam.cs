@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(Camera))]
 public class OrbitCam : MonoBehaviour
 {
     public GameObject m_target; //cam follow target
@@ -9,10 +10,12 @@ public class OrbitCam : MonoBehaviour
     public bool m_HideCursor = true;
     
     [HideInInspector]
-    public SkinnedMeshRenderer[] m_meshRenderers;
+    public float m_dist;
 
     [HideInInspector]
-    public float m_dist;
+    public Camera m_thisCam;
+    [HideInInspector]
+    public LayerMask m_thisLayerMask;
 
     private RaycastHit m_interAt;
     private Quaternion m_rot;
@@ -22,7 +25,11 @@ public class OrbitCam : MonoBehaviour
 
 	// Use this for initialization
 	public virtual void Start ()
-    {            
+    {
+        m_thisCam = GetComponent<Camera>();
+        m_thisLayerMask = ~LayerMask.GetMask("Player", "Ignore Raycast");
+
+
         m_dist = m_startDist;
         transform.position = m_target.transform.position + new Vector3(0.0f, 0.0f, -m_dist);
 
@@ -41,9 +48,7 @@ public class OrbitCam : MonoBehaviour
         if (player == null)
         {
             Debug.Log("no player found! (ensure player tagged player)");
-        }
-
-        m_meshRenderers = player.GetComponentsInChildren<SkinnedMeshRenderer>(true);        
+        }      
 	}
 
     // Update is called once per frame
@@ -99,24 +104,14 @@ public class OrbitCam : MonoBehaviour
             //Debug.Log("Hiding player!");
 
             m_playerHidden = true;
-            for (int i = 0; i < m_meshRenderers.Length; i++)
-            {
-                //Debug.Log("Hiding mesh " + i.ToString() + " ; " + m_meshRenderers[i].name.ToString());
-
-                m_meshRenderers[i].enabled = false;
-            }
+            m_thisCam.cullingMask = m_thisLayerMask;
         }
         else if (distFromPlayer > m_hidePlayerDist && m_playerHidden)
         {
             //Debug.Log("Un Hiding player!");
-
+            
             m_playerHidden = false;
-            for (int i = 0; i < m_meshRenderers.Length; i++)
-            {
-                //Debug.Log("Un Hiding mesh " + i.ToString());
-
-                m_meshRenderers[i].enabled = true;
-            }
+            m_thisCam.cullingMask = ~0;
         }
 
         //Move camera
@@ -124,7 +119,7 @@ public class OrbitCam : MonoBehaviour
         transform.rotation = m_rot;
 
         //Find "hit"
-        if(!Physics.Raycast(transform.position, transform.forward, out m_hit, m_maxDist, ~LayerMask.GetMask("Player", "Ignore Raycast")))
+        if(!Physics.Raycast(transform.position, transform.forward, out m_hit, m_maxDist, m_thisLayerMask))
         {
             m_hit.point = transform.position + transform.forward * m_maxDist;
             m_hit.normal = Vector3.up;
@@ -142,7 +137,7 @@ public class OrbitCam : MonoBehaviour
     Vector3 IntersectCheck (Vector3 target)
     {
         //If intersection (cast ray from camera to player)
-        if (Physics.Raycast(m_target.transform.position, target - m_target.transform.position, out m_interAt, m_dist, ~LayerMask.GetMask("Player", "Ignore Raycast")))
+        if (Physics.Raycast(m_target.transform.position, target - m_target.transform.position, out m_interAt, m_dist, m_thisLayerMask))
         {   
 #if UNITY_EDITOR
             Debug.DrawLine(m_target.transform.position, m_interAt.point, Color.yellow, 0.01f, true);
