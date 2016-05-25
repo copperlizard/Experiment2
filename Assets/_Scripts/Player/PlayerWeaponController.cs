@@ -214,6 +214,9 @@ public class PlayerWeaponController : MonoBehaviour
 
     public List<GameObject> m_weapons = new List<GameObject>();
 
+    [HideInInspector]
+    public int m_curWeaponNum = 0;
+
     private OrbitCam m_camController;
     private Weapon m_curWeapon;
 
@@ -225,7 +228,6 @@ public class PlayerWeaponController : MonoBehaviour
     private Vector3 m_camTarStartLocalPos;
 
     private float m_rightElbowWeight, m_lastCamDist;
-    private int m_curWeaponNum = 0;
 
     private bool m_holstered = false, m_holsterLock = false;
 

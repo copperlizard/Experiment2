@@ -75,6 +75,7 @@
     <Compile Include="Assets\_Scripts\OrbitCam.cs" />
     <Compile Include="Assets\_Scripts\Player\AIControlInput.cs" />
     <Compile Include="Assets\_Scripts\Player\AIOrbitCam.cs" />
+    <Compile Include="Assets\_Scripts\Player\NavMeshAgentGhost.cs" />
     <Compile Include="Assets\_Scripts\Player\PlayerAnimationController.cs" />
     <Compile Include="Assets\_Scripts\Player\PlayerHealth.cs" />
     <Compile Include="Assets\_Scripts\Player\PlayerMovementController.cs" />

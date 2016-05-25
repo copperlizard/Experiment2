@@ -10,17 +10,16 @@ public class OrbitCam : MonoBehaviour
     public bool m_HideCursor = true;
     
     [HideInInspector]
-    public float m_dist;
-
-    [HideInInspector]
     public Camera m_thisCam;
     [HideInInspector]
     public LayerMask m_thisLayerMask;
 
+    [HideInInspector]
+    public float m_dist, m_h, m_v, m_d;
+
     private RaycastHit m_interAt;
     private Quaternion m_rot;
     private Vector3 m_curVel = Vector3.zero;
-    private float m_h, m_v, m_d;
     private bool m_playerHidden = false;
 
 	// Use this for initialization

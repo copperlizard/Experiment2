@@ -26,10 +26,12 @@ public class PlayerMovementController : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
+        /*
 #if UNITY_EDITOR
         Debug.DrawLine(transform.position, transform.position + transform.forward * 3.0f, Color.red);
         Debug.DrawLine(transform.position, transform.position + m_move, Color.blue);
 #endif  
+        */
     }
 
     void FixedUpdate ()
@@ -76,9 +78,12 @@ public class PlayerMovementController : MonoBehaviour
             Vector3 startPos = transform.position;
             startPos.y += m_headCheckGroundOffset;
 
+            /*
 #if UNITY_EDITOR
             Debug.DrawLine(startPos, startPos + Vector3.up * m_headCheckDist, Color.green);
 #endif
+            */
+
             if(Physics.Raycast(startPos, Vector3.up, m_headCheckDist, ~LayerMask.GetMask("Player", "AIEnemy", "Ignore Raycast")))
             {
                 m_stateController.m_crouch = true;
@@ -167,11 +172,12 @@ public class PlayerMovementController : MonoBehaviour
     }
 
     bool CheckGround ()
-    {   
-
+    {
+        /*   
 #if UNITY_EDITOR
         Debug.DrawLine(transform.position + (Vector3.up * m_groundCheckDist * 0.5f), (transform.position + (Vector3.up * m_groundCheckDist * 0.5f)) + Vector3.down * m_groundCheckDist);
 #endif
+        */
 
         RaycastHit hit;
         if(Physics.Raycast(transform.position + (Vector3.up * m_groundCheckDist * 0.5f), Vector3.down, out hit, m_groundCheckDist))
