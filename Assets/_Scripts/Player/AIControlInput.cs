@@ -4,7 +4,7 @@ using System.Collections;
 public class AIControlInput : MonoBehaviour
 {
     public GameObject m_target;
-
+    
     public AIOrbitCam m_AICam;
 
     public float m_minRange;
@@ -19,8 +19,9 @@ public class AIControlInput : MonoBehaviour
 
     private Vector3 m_toTar;
     private float m_v, m_h;
-    private bool m_aiming, m_fire, m_fireCooldown, m_reload, m_jump, m_crouch, m_walk, m_sprint, m_holster;
     private int m_wepNum, m_curCorner;
+    private bool m_aiming, m_fire, m_fireCooldown, m_reload,
+        m_jump, m_crouch, m_walk, m_sprint, m_holster, m_freshPath = false;
 
     // Use this for initialization
     void Start ()
@@ -30,6 +31,7 @@ public class AIControlInput : MonoBehaviour
         m_curWeapon = m_weaponController.m_weapons[m_weaponController.m_curWeaponNum].GetComponent<Weapon>();
 
         m_navAgent = GetComponentInChildren<NavMeshAgent>();
+        m_curPath = new NavMeshPath();
     }
 	
 	// Update is called once per frame
@@ -41,7 +43,11 @@ public class AIControlInput : MonoBehaviour
             Debug.Log("no direct path!");
             AIMove(true);
         }
-        AIMove(false);
+        else
+        {
+            m_freshPath = false;
+            AIMove(false);
+        }
         
         if (m_AICam.m_aiming)
         {
@@ -70,6 +76,18 @@ public class AIControlInput : MonoBehaviour
         {
             m_reload = false;
         }
+
+#if UNITY_EDITOR
+        if (m_freshPath)
+        {
+            //Debug.Log("drawing path!");
+
+            for (int i = 0; i < m_curPath.corners.Length - 1; i++)
+            {
+                Debug.DrawLine(m_curPath.corners[i], m_curPath.corners[i + 1], Color.green);
+            }
+        }
+#endif
     }
 
     void FixedUpdate ()
@@ -84,72 +102,91 @@ public class AIControlInput : MonoBehaviour
 
     void FindPath ()
     {
-        m_navAgent.CalculatePath(m_target.transform.position, m_curPath);
-        m_curCorner = 0;
+        if (!m_freshPath)
+        {
+            Debug.Log("finding fresh path");
+
+            m_freshPath = m_navAgent.CalculatePath(m_target.transform.position, m_curPath);
+            m_curCorner = 0;
+        }
     }
 
     void AIMove (bool path)
     {
         Vector3 toTar = m_target.transform.position - transform.position;
 
+        toTar = Vector3.ProjectOnPlane(toTar, Vector3.up);
+
+        toTar = transform.InverseTransformDirection(toTar);
+
+        //Debug.DrawLine(transform.position, transform.position + toTar, Color.yellow);
+
         if (toTar.magnitude > m_minRange)
         {
-            Debug.Log("moving!!!");
+            //Debug.Log("moving!!!");
 
             if (!path)
             {
-                if (!m_aiming)
-                {   
-                    Debug.Log("direct move!");
-                }
-                else
-                {
-                    m_v = 1.0f;
-
-                    Debug.Log("aim move!");
-                }
+                m_v = toTar.normalized.z;
+                m_h = toTar.normalized.x;                
             }
             else
-            {                
+            {
+                //Debug.Log("traversing path!");
+                                
                 TraversePath();
             }
         }
         else
         {
-            Debug.Log("enemy too close!");
+            //Debug.Log("enemy too close!");
 
-            m_v = 0.0f;
-            m_h = 0.0f;
+            m_v = Mathf.Lerp(m_v, 0.0f, 0.1f);
+            m_h = Mathf.Lerp(m_h, 0.0f, 0.1f);
         }
     }
 
     private void TraversePath()
     {
-        Vector3 toTar = m_curPath.corners[m_curCorner] - transform.position;
-
-        if (toTar.magnitude < 0.1f)
+        if (m_freshPath)
         {
-            m_curCorner++;
+            Vector3 toTar = m_curPath.corners[m_curCorner] - transform.position;
 
-            if (m_curCorner >= m_curPath.corners.Length)
+            Debug.DrawLine(transform.position, transform.position + toTar, Color.yellow);
+
+            if (toTar.magnitude < 2.0f)
             {
-                FindPath();
-                TraversePath();
+                m_curCorner++;
+
+                if (m_curCorner >= m_curPath.corners.Length - 1)
+                {
+                    Debug.Log("reached path end!");
+
+                    m_freshPath = false;
+                    TraversePath(); //start over
+                    return;
+                }
+                else
+                {
+                    Debug.Log("reached path corner!");                    
+                }
             }
             else
             {
-                toTar = m_curPath.corners[m_curCorner] - transform.position;
+                Debug.Log("approaching path corner!");
+
+                toTar = transform.InverseTransformDirection(toTar);                
                 m_v = toTar.normalized.z;
                 m_h = toTar.normalized.x;
             }
         }
         else
         {
-            m_v = toTar.normalized.z;
-            m_h = toTar.normalized.x;
-        }
+            Debug.Log("finding new path!");
 
-        
+            FindPath();
+            //not traversed until next call
+        }
     }
 
     IEnumerator BurstFire(float time)
