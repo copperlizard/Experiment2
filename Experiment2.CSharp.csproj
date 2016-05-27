@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Assets\HoverTest.cs" />
     <Compile Include="Assets\HoverTest2.cs" />
+    <Compile Include="Assets\_Scripts\AIEnemyActivator.cs" />
     <Compile Include="Assets\_Scripts\Enemies\EnemySphere\EnemySphereController.cs" />
     <Compile Include="Assets\_Scripts\Enemies\EnemySphere\EnemySphereWeaponController.cs" />
     <Compile Include="Assets\_Scripts\EnemyActivator.cs" />

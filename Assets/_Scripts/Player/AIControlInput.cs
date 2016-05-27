@@ -37,7 +37,7 @@ public class AIControlInput : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        if (!DirectPath())
+        if (!DirectPath(m_target.transform.position))
         {
             FindPath();
             Debug.Log("no direct path!");
@@ -95,9 +95,9 @@ public class AIControlInput : MonoBehaviour
         m_mover.Move(m_v, m_h, m_fire, m_aiming, m_reload, m_jump, m_crouch, m_walk, m_sprint, m_holster, m_wepNum);
     }
     
-    bool DirectPath()
+    bool DirectPath(Vector3 pos)
     {
-        return !m_navAgent.Raycast(m_target.transform.position, out m_navHit);
+        return !m_navAgent.Raycast(pos, out m_navHit);
     }
 
     void FindPath ()
@@ -139,10 +139,10 @@ public class AIControlInput : MonoBehaviour
         }
         else
         {
-            //Debug.Log("enemy too close!");
+            Debug.Log("enemy too close!");
 
-            m_v = Mathf.Lerp(m_v, 0.0f, 0.1f);
-            m_h = Mathf.Lerp(m_h, 0.0f, 0.1f);
+            m_v = Mathf.Lerp(m_v, 0.0f, 0.5f);
+            m_h = Mathf.Lerp(m_h, 0.0f, 0.5f);
         }
     }
 
@@ -174,6 +174,15 @@ public class AIControlInput : MonoBehaviour
             else
             {
                 Debug.Log("approaching path corner!");
+
+                if (!DirectPath(m_curPath.corners[m_curCorner]))
+                {
+                    Debug.Log("path interupted!");
+
+                    m_freshPath = false;
+                    TraversePath();
+                    return;
+                }
 
                 toTar = transform.InverseTransformDirection(toTar);                
                 m_v = toTar.normalized.z;
