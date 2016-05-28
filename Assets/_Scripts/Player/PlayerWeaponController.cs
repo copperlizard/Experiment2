@@ -264,6 +264,11 @@ public class PlayerWeaponController : MonoBehaviour
     {
         m_lastCamDist = m_camController.GetCamDist();
     }
+
+    void OnDisable ()
+    {
+        m_curWeapon.UpdateWepAnimator(false, false, false, false, false, false, true, true);
+    }
 	
 	// Update is called once per frame
 	void Update ()

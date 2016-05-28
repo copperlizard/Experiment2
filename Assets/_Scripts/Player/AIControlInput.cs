@@ -94,7 +94,37 @@ public class AIControlInput : MonoBehaviour
     {
         m_mover.Move(m_v, m_h, m_fire, m_aiming, m_reload, m_jump, m_crouch, m_walk, m_sprint, m_holster, m_wepNum);
     }
-    
+
+    private void OnEnable ()
+    {
+        if (m_weaponController == null)
+        {
+            return;
+        }
+
+        if (!m_weaponController.enabled)
+        {
+            m_weaponController.enabled = true;
+
+            m_mover.Move(0.0f, 0.0f, false, false, true, false, false, false, false, false, 0);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (m_weaponController == null || m_mover == null)
+        {
+            return;
+        }
+
+        if (m_weaponController.enabled)
+        {
+            m_mover.Move(0.0f, 0.0f, false, false, true, false, false, false, false, true, 0);
+            
+            m_weaponController.enabled = false;
+        }
+    }
+
     bool DirectPath(Vector3 pos)
     {
         return !m_navAgent.Raycast(pos, out m_navHit);
