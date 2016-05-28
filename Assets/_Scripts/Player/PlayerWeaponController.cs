@@ -50,6 +50,13 @@ public class Weapon : MonoBehaviour
 
         //m_wepAnimator.Rebind();
         //m_wepAnimator.StartPlayback();
+
+        m_wepAnimator.speed = 1.0f;
+    }
+
+    void OnDisable ()
+    {
+        m_wepAnimator.speed = 0.0f;
     }
 
     public virtual void Update ()
@@ -178,6 +185,12 @@ public class Weapon : MonoBehaviour
 
     public virtual void UpdateWepAnimator (bool aiming, bool firing, bool reloading, bool crouching, bool sprinting, bool sliding, bool idle, bool grounded)
     {
+        if (!m_wepAnimator.isInitialized)
+        {
+            Debug.Log("m_wepAnimator for " + gameObject.name + " not initialized!");
+            return;
+        }
+
         m_aiming = aiming;
         m_firing = firing;
         m_reloading = reloading;

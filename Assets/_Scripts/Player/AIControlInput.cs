@@ -40,7 +40,7 @@ public class AIControlInput : MonoBehaviour
         if (!DirectPath(m_target.transform.position))
         {
             FindPath();
-            Debug.Log("no direct path!");
+            //Debug.Log("no direct path!");
             AIMove(true);
         }
         else
@@ -134,7 +134,7 @@ public class AIControlInput : MonoBehaviour
     {
         if (!m_freshPath)
         {
-            Debug.Log("finding fresh path");
+            //Debug.Log("finding fresh path");
 
             m_freshPath = m_navAgent.CalculatePath(m_target.transform.position, m_curPath);
             m_curCorner = 0;
@@ -169,10 +169,10 @@ public class AIControlInput : MonoBehaviour
         }
         else
         {
-            Debug.Log("enemy too close!");
+            //Debug.Log("enemy too close!");
 
-            m_v = Mathf.Lerp(m_v, 0.0f, 0.5f);
-            m_h = Mathf.Lerp(m_h, 0.0f, 0.5f);
+            m_v = Mathf.Lerp(m_v, -toTar.normalized.z, 0.5f);
+            m_h = Mathf.Lerp(m_h, Mathf.Cos(Time.time * 0.1f), 0.5f);
         }
     }
 
@@ -190,24 +190,20 @@ public class AIControlInput : MonoBehaviour
 
                 if (m_curCorner >= m_curPath.corners.Length - 1)
                 {
-                    Debug.Log("reached path end!");
+                    //Debug.Log("reached path end!");
 
                     m_freshPath = false;
                     TraversePath(); //start over
                     return;
-                }
-                else
-                {
-                    Debug.Log("reached path corner!");                    
-                }
+                }                
             }
             else
             {
-                Debug.Log("approaching path corner!");
+                //Debug.Log("approaching path corner!");
 
                 if (!DirectPath(m_curPath.corners[m_curCorner]))
                 {
-                    Debug.Log("path interupted!");
+                    //Debug.Log("path interupted!");
 
                     m_freshPath = false;
                     TraversePath();
@@ -221,10 +217,9 @@ public class AIControlInput : MonoBehaviour
         }
         else
         {
-            Debug.Log("finding new path!");
+            //Debug.Log("finding new path!");
 
-            FindPath();
-            //not traversed until next call
+            FindPath();  //not traversed until next call
         }
     }
 

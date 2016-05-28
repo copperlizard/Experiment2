@@ -104,6 +104,15 @@ public class AIEnemyActivator : MonoBehaviour
 
         deadBody.SetActive(true);
 
+        Rigidbody[] rbs = deadBody.GetComponentsInChildren<Rigidbody>();
+
+        Vector3 vel = m_AImainRB.velocity;
+
+        for (int i = 0; i < rbs.Length; i++)
+        {
+            rbs[i].velocity = vel;
+        }
+
         /*
         Animator deadBodyAnimator = deadBody.GetComponent<Animator>();
 
