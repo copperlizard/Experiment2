@@ -51,6 +51,7 @@ public class AIOrbitCam : OrbitCam
         else
         {
             HomeCam();
+            m_fire = false;
             m_aiming = false;
         }
     }
@@ -86,7 +87,7 @@ public class AIOrbitCam : OrbitCam
         float uCheck = Vector3.Dot(transform.up, m_toTar.normalized);
         float rCheck = Vector3.Dot(transform.right, m_toTar.normalized);
 
-        if (fCheck > 0.8f)
+        if (fCheck > 0.8f && m_toTar.magnitude <= m_firingRange)
         {
             m_fire = true;
         }
@@ -123,15 +124,6 @@ public class AIOrbitCam : OrbitCam
         float fCheck = Vector3.Dot(transform.forward, m_target.transform.forward);
         float uCheck = Vector3.Dot(transform.up, m_target.transform.forward);
         float rCheck = Vector3.Dot(transform.right, m_target.transform.forward);
-
-        if (fCheck > 0.8f)
-        {
-            m_fire = true;
-        }
-        else
-        {
-            m_fire = false;
-        }
 
         if (uCheck > 0.0f)
         {

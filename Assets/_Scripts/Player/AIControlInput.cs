@@ -60,8 +60,8 @@ public class AIControlInput : MonoBehaviour
         
         if (m_AICam.m_fire && !m_fireCooldown)
         {
-            m_fire = true;
-            StartCoroutine(BurstFire(Random.Range(0.1f, 0.3f)));
+            //Debug.Log("firing weapon!");
+            StartCoroutine(BurstFire(Random.Range(1.0f, 1.5f)));
         }
         else
         {
@@ -171,8 +171,8 @@ public class AIControlInput : MonoBehaviour
         {
             //Debug.Log("enemy too close!");
 
-            m_v = Mathf.Lerp(m_v, -toTar.normalized.z, 0.5f);
-            m_h = Mathf.Lerp(m_h, Mathf.Cos(Time.time * 0.1f), 0.5f);
+            m_v = Mathf.Lerp(m_v, 0.0f, 0.5f);
+            m_h = Mathf.Lerp(m_h, 0.0f, 0.5f);
         }
     }
 
@@ -225,21 +225,28 @@ public class AIControlInput : MonoBehaviour
 
     IEnumerator BurstFire(float time)
     {
+        //Debug.Log("firing for " + time.ToString());
+
         m_fireCooldown = true;
         float startTime = Time.time;
-        while (Time.time - startTime < time && m_fire)
+        while (Time.time - startTime < time)
         {
+            //Debug.Log("burst");
+            m_fire = true;
             yield return null;
         }        
         m_fire = false;
-        StartCoroutine(FireCooldown(Random.Range(time, 0.3f)));
+        StartCoroutine(FireCooldown(Random.Range(0.25f, 0.75f)));
     }
 
     IEnumerator FireCooldown(float time)
-    {   
+    {
+        //Debug.Log("cooldown for " + time.ToString());
+
         float startTime = Time.time;
-        while (Time.time - startTime < time && m_fire)
+        while (Time.time - startTime < time)
         {
+            //Debug.Log("cooldown");
             yield return null;
         }
         m_fireCooldown = false;
