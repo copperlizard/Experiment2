@@ -3,22 +3,29 @@ using System.Collections;
 
 public class AIOrbitCam : OrbitCam
 {
-    public GameObject m_enemy;
-    public Vector3 m_enemyOffset;
+    public GameObject m_enemy, m_targetTarget;
+    public PlayerWeaponController m_weaponController;
+        
+    public Vector3 m_targetTargetOffset;
     public float m_firingRange, m_rotInterRate;
 
     [HideInInspector]
     public bool m_aiming = false, m_fire = false;
 
+    private Rigidbody m_enemyRB;
+    private Weapon m_curWeapon;
+
     private RaycastHit m_sightHit;
     private Vector3 m_toTar;
 
     private float m_dv, m_dh;
+    private int m_lastWeapon = -1;
     
     // Use this for initialization
     public override void Start ()
     {
         m_thisCam = GetComponent<Camera>();
+        
         m_thisLayerMask = ~LayerMask.GetMask("AIEnemy", "Ignore Raycast");
 
         m_dist = m_startDist;
@@ -33,6 +40,11 @@ public class AIOrbitCam : OrbitCam
         {
             Cursor.visible = true;
         }
+
+        m_lastWeapon = m_weaponController.m_curWeaponNum;
+        m_curWeapon = m_weaponController.m_weapons[m_lastWeapon].GetComponent<Weapon>();
+
+        m_enemyRB = m_enemy.GetComponent<Rigidbody>();
     }
 	
 	// Update is called once per frame
@@ -58,27 +70,69 @@ public class AIOrbitCam : OrbitCam
 
     bool SeeTarget()
     {
-        m_toTar = (m_enemy.transform.position + m_enemyOffset) - m_target.transform.position;
+        if (m_enemyRB.velocity.magnitude > 0.0f)
+        {
+            PredictTargetPosition();
+        }
+        else
+        {
+            m_toTar = (m_targetTarget.transform.position + m_targetTargetOffset) - m_target.transform.position;
+        }
+
+        //Debug.DrawLine(m_target.transform.position, m_target.transform.position + m_toTar, Color.red);
 
         //Target too far away
         if (m_toTar.magnitude > m_firingRange)
         {
             //Debug.Log("enemy too far!");
-
             return false;
         }
 
         bool playerVisible = !Physics.Raycast(m_target.transform.position, m_toTar.normalized, m_toTar.magnitude, ~LayerMask.GetMask("AIEnemy", "Player"));
         
-        /*
-#if UNITY_EDITOR
-        Debug.DrawLine(m_target.transform.position, m_enemy.transform.position);
-#endif
-        */
-
         bool lineOfSight = (Vector3.Dot(transform.forward, m_toTar.normalized) > 0.5f) ? true : false;
 
         return (playerVisible && lineOfSight);
+    }
+
+    void PredictTargetPosition ()
+    {
+        if (m_lastWeapon != m_weaponController.m_curWeaponNum)
+        {
+            Debug.Log("Fetching weapon stats!");            
+            m_lastWeapon = m_weaponController.m_curWeaponNum;
+            m_curWeapon = m_weaponController.m_weapons[m_lastWeapon].GetComponent<Weapon>();
+        }
+
+        Vector3 playerStartPos = m_targetTarget.transform.position + m_targetTargetOffset;        
+        Vector3 bulletStartPos = m_curWeapon.m_firePos.position;
+
+        Vector3 playerFuturePos = playerStartPos + (m_enemyRB.velocity * Time.fixedDeltaTime * 30.0f);
+        
+        Vector3 toPlayerFuturePos = playerFuturePos - m_target.transform.position;
+        Vector3 bulletFuturePos = m_target.transform.position + (toPlayerFuturePos.normalized * m_curWeapon.m_projectileSpeed * Time.fixedDeltaTime * 30.0f);
+                
+        Vector3 predictedPlayerPath = playerFuturePos - playerStartPos; //P
+        Vector3 predictedBulletPoss = bulletFuturePos - bulletStartPos; //Q
+        
+        //Debug.DrawLine(playerStartPos, playerStartPos + predictedPlayerPath, Color.blue);
+        //Debug.DrawLine(bulletStartPos, bulletStartPos + predictedBulletPoss, Color.magenta);
+
+        //Find closest point on P to Q
+        Vector3 w = playerStartPos - bulletStartPos;
+        float a = Vector3.Dot(predictedPlayerPath, predictedPlayerPath);
+        float b = Vector3.Dot(predictedPlayerPath, predictedBulletPoss);
+        float c = Vector3.Dot(predictedBulletPoss, predictedBulletPoss);
+        float d = Vector3.Dot(predictedPlayerPath, w); 
+        float e = Vector3.Dot(predictedBulletPoss, w);
+
+        float sc = (b*e - c*d) / (a*c - b*b);
+
+        Vector3 predictedTarPos = (m_targetTarget.transform.position + m_targetTargetOffset) + (predictedPlayerPath.normalized * sc);
+
+        //Debug.DrawLine(m_target.transform.position, predictedTarPos, Color.cyan);
+
+        m_toTar = predictedTarPos - m_target.transform.position;
     }
 
     void AimCam ()

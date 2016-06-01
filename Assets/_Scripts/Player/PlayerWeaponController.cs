@@ -103,9 +103,9 @@ public class Weapon : MonoBehaviour
             yield return null;
         }
 
-        //Shoot projectile
-        Debug.DrawLine(m_firePos.transform.position, m_firePos.transform.position + m_firePos.transform.forward);
+        //Debug.DrawLine(m_firePos.transform.position, m_firePos.transform.position + m_firePos.transform.forward);
 
+        //Shoot projectile
         GameObject shot = m_ammo.GetObject();
         shot.transform.position = m_firePos.transform.position;
 
@@ -456,9 +456,11 @@ public class PlayerWeaponController : MonoBehaviour
 
             //Debug.Log(m_weapons[m_curWeaponNum].transform.position.ToString());
 
+            /*
 #if UNITY_EDITOR
             Debug.DrawLine(m_weaponHolder.transform.position, m_weaponHolder.transform.position + wepPosOffset);
 #endif
+            */
 
             Vector3 toTar = ((m_camController.m_hit.point + wepPosOffset) - m_weaponHolder.transform.position).normalized;
 
@@ -481,9 +483,11 @@ public class PlayerWeaponController : MonoBehaviour
                 
                 m_weapons[m_curWeaponNum].transform.rotation = wepTarRot;
 
+                /*
 #if UNITY_EDITOR
                 Debug.DrawLine(m_curWeapon.m_firePos.transform.position, m_curWeapon.m_firePos.transform.position + (m_curWeapon.m_firePos.forward * 100.0f), Color.red);
 #endif
+                */
             }
             else
             {

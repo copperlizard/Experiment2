@@ -13,9 +13,11 @@ public class AIEnemyActivator : MonoBehaviour
     private Rigidbody m_AImainRB;
 
     private Animator m_AIanimator;
+
+    /*
     private Transform m_hips, m_leftUpperLeg, m_rightUpperLeg, m_leftLowerLeg, m_rightLowerLeg, m_leftFoot, m_rightFoot,
         m_spine, m_chest, m_neck, m_head, m_leftShoulder, m_rightShoulder, m_leftUpperArm, m_rightUpperArm, m_leftLowerArm, m_rightLowerArm,
-        m_leftHand, m_rightHand, m_leftToes, m_rightToes, m_leftEye, m_rightEye, m_jaw;
+        m_leftHand, m_rightHand, m_leftToes, m_rightToes, m_leftEye, m_rightEye, m_jaw;*/
 
     private MeshRenderer[] m_AIweaponMeshes;
     private SkinnedMeshRenderer[] m_AIskinMeshes;
@@ -38,7 +40,7 @@ public class AIEnemyActivator : MonoBehaviour
         m_AIHealth = m_AIenemy.GetComponent<PlayerHealth>();
 
         m_AIanimator = m_AIenemy.GetComponent<Animator>();
-        GetBones();
+        //GetBones();
 
         m_startPos = m_AIenemy.transform.position;
         m_startRot = m_AIenemy.transform.rotation;
@@ -62,6 +64,7 @@ public class AIEnemyActivator : MonoBehaviour
         }
 	}
 
+    /*
     void GetBones ()
     {
         m_hips = m_AIanimator.GetBoneTransform(HumanBodyBones.Hips);
@@ -89,6 +92,7 @@ public class AIEnemyActivator : MonoBehaviour
         m_rightEye = m_AIanimator.GetBoneTransform(HumanBodyBones.RightEye);
         m_jaw = m_AIanimator.GetBoneTransform(HumanBodyBones.Jaw);
     }
+    */
 
     void DropBody()
     {
