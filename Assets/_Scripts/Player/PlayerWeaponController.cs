@@ -593,6 +593,8 @@ public class PlayerWeaponController : MonoBehaviour
 
     public void SelectWeapon (int num)
     {
+        //Debug.Log("selecting weapon num == " + num.ToString());
+
         //Out of selection range
         if (num < 0 && num > m_weapons.Count - 1)
         {

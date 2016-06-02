@@ -10,6 +10,9 @@ public class AIOrbitCam : OrbitCam
     public float m_firingRange, m_rotInterRate;
 
     [HideInInspector]
+    public int m_nextWeapon = 0;
+
+    [HideInInspector]
     public bool m_aiming = false, m_fire = false;
 
     private Rigidbody m_enemyRB;
@@ -20,6 +23,8 @@ public class AIOrbitCam : OrbitCam
 
     private float m_dv, m_dh;
     private int m_lastWeapon = -1;
+
+    private bool m_selectWeapon = true;
     
     // Use this for initialization
     public override void Start ()
@@ -53,8 +58,38 @@ public class AIOrbitCam : OrbitCam
         AI();
     }
 
+    IEnumerator SelectWeapon()
+    {
+        m_selectWeapon = false;
+        
+        while (m_curWeapon.m_thisMagazine < m_curWeapon.m_magazineSize)
+        {
+            //Debug.Log("waiting for reload");
+            yield return null;
+        }
+
+        m_nextWeapon = (Random.Range(0.0f, 1.0f) > 0.5f) ? 0 : 1;
+        
+        float wepDuration = Random.Range(3.0f, 30.0f);
+        float startTime = Time.time;
+
+        while (Time.time - startTime < wepDuration)
+        {            
+            yield return null;
+        }
+
+        m_selectWeapon = true;
+    }
+
     void AI()
     {
+        /*
+        if (m_selectWeapon)
+        {
+            StartCoroutine(SelectWeapon());
+        }
+        */
+
         if (SeeTarget())
         {   
             AimCam();
@@ -62,15 +97,16 @@ public class AIOrbitCam : OrbitCam
         }
         else
         {
+            //Debug.Log("can't see player!");
+
             HomeCam();
             m_fire = false;
-            m_aiming = false;
         }
     }
 
     bool SeeTarget()
     {
-        if (m_enemyRB.velocity.magnitude > 0.0f)
+        if (m_enemyRB.velocity.magnitude > 0.1f)
         {
             PredictTargetPosition();
         }
@@ -79,8 +115,6 @@ public class AIOrbitCam : OrbitCam
             m_toTar = (m_targetTarget.transform.position + m_targetTargetOffset) - m_target.transform.position;
         }
 
-        //Debug.DrawLine(m_target.transform.position, m_target.transform.position + m_toTar, Color.red);
-
         //Target too far away
         if (m_toTar.magnitude > m_firingRange)
         {
@@ -88,9 +122,13 @@ public class AIOrbitCam : OrbitCam
             return false;
         }
 
-        bool playerVisible = !Physics.Raycast(m_target.transform.position, m_toTar.normalized, m_toTar.magnitude, ~LayerMask.GetMask("AIEnemy", "Player"));
+        //Debug.DrawLine(m_target.transform.position, m_target.transform.position + m_toTar, Color.red);        
+
+        bool playerVisible = !Physics.Raycast(m_target.transform.position, m_toTar.normalized, m_toTar.magnitude, ~LayerMask.GetMask("AIEnemy", "Player", "Ignore Raycast"));
         
-        bool lineOfSight = (Vector3.Dot(transform.forward, m_toTar.normalized) > 0.5f) ? true : false;
+        bool lineOfSight = (Vector3.Dot(transform.forward, m_toTar.normalized) > 0.0f) ? true : false;
+
+        //Debug.Log("playerVisible == " + playerVisible.ToString() + " ; lineOfSight == " + lineOfSight.ToString());
 
         return (playerVisible && lineOfSight);
     }
@@ -178,6 +216,11 @@ public class AIOrbitCam : OrbitCam
         float fCheck = Vector3.Dot(transform.forward, m_target.transform.forward);
         float uCheck = Vector3.Dot(transform.up, m_target.transform.forward);
         float rCheck = Vector3.Dot(transform.right, m_target.transform.forward);
+
+        if (fCheck > 0.95f)
+        {
+            m_aiming = false;
+        }
 
         if (uCheck > 0.0f)
         {

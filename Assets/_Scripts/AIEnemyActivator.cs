@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class AIEnemyActivator : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class AIEnemyActivator : MonoBehaviour
 
     private AIControlInput m_AIcontrol;
     private PlayerHealth m_AIHealth;
+    private PlayerWeaponController m_AIWeaponController;
     private Rigidbody m_AImainRB;
 
     private Animator m_AIanimator;
@@ -22,6 +24,8 @@ public class AIEnemyActivator : MonoBehaviour
     private MeshRenderer[] m_AIweaponMeshes;
     private SkinnedMeshRenderer[] m_AIskinMeshes;
     private Collider[] m_AIColliders;
+
+    private List<int> m_weaponStartRounds;
 
     private Vector3 m_startPos;
     private Quaternion m_startRot;
@@ -41,6 +45,15 @@ public class AIEnemyActivator : MonoBehaviour
 
         m_AIanimator = m_AIenemy.GetComponent<Animator>();
         //GetBones();
+
+        m_AIWeaponController = m_AIenemy.GetComponent<PlayerWeaponController>();
+        m_weaponStartRounds = new List<int>();
+
+        for (int i = 0; i < m_AIWeaponController.m_weapons.Count; i++)
+        {
+            Weapon wep = m_AIWeaponController.m_weapons[i].GetComponent<Weapon>();
+            m_weaponStartRounds.Add(wep.m_rounds);
+        }
 
         m_startPos = m_AIenemy.transform.position;
         m_startRot = m_AIenemy.transform.rotation;
@@ -280,6 +293,16 @@ public class AIEnemyActivator : MonoBehaviour
         for (int i = 0; i < m_AIColliders.Length; i++)
         {
             m_AIColliders[i].enabled = state;
+        }
+
+        if (state)
+        {
+            for (int i = 0; i < m_AIWeaponController.m_weapons.Count; i++)
+            {
+                Weapon wep = m_AIWeaponController.m_weapons[i].GetComponent<Weapon>();
+                wep.m_rounds = m_weaponStartRounds[i];
+                wep.m_thisMagazine = wep.m_magazineSize;
+            }
         }
     }
 }

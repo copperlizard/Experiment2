@@ -67,6 +67,12 @@ public class AIControlInput : MonoBehaviour
         {
             m_fire = false;
         }
+
+        if (m_AICam.m_nextWeapon != m_wepNum)
+        {
+            m_wepNum = m_AICam.m_nextWeapon;
+            m_curWeapon = m_weaponController.m_weapons[m_wepNum].GetComponent<Weapon>();
+        }
         
         if (m_curWeapon.m_thisMagazine == 0)
         {
@@ -92,7 +98,7 @@ public class AIControlInput : MonoBehaviour
 
     void FixedUpdate ()
     {
-        m_mover.Move(m_v, m_h, m_fire, m_aiming, m_reload, m_jump, m_crouch, m_walk, m_sprint, m_holster, m_wepNum);
+        m_mover.Move(m_v, m_h, m_fire, m_aiming, m_reload, m_jump, m_crouch, m_walk, m_sprint, m_holster, m_AICam.m_nextWeapon);
     }
 
     private void OnEnable ()
@@ -137,6 +143,12 @@ public class AIControlInput : MonoBehaviour
             //Debug.Log("finding fresh path");
 
             m_freshPath = m_navAgent.CalculatePath(m_target.transform.position, m_curPath);
+
+            if (!m_freshPath)
+            {
+                m_v = Mathf.Lerp(m_v, -0.5f, 0.1f);
+            }
+
             m_curCorner = 0;
         }
     }
@@ -148,10 +160,8 @@ public class AIControlInput : MonoBehaviour
         toTar = Vector3.ProjectOnPlane(toTar, Vector3.up);
 
         toTar = transform.InverseTransformDirection(toTar);
-
-        //Debug.DrawLine(transform.position, transform.position + toTar, Color.yellow);
-
-        if (toTar.magnitude > m_minRange)
+        
+        if (toTar.magnitude > m_minRange || path)
         {
             //Debug.Log("moving!!!");
 
@@ -169,22 +179,34 @@ public class AIControlInput : MonoBehaviour
         }
         else
         {
-            //Debug.Log("enemy too close!");
+            Debug.Log("enemy too close!");
 
-            m_v = Mathf.Lerp(m_v, 0.0f, 0.5f);
-            m_h = Mathf.Lerp(m_h, 0.0f, 0.5f);
+            if(toTar.magnitude < m_minRange - (m_minRange * 0.5f))
+            {
+                m_v = Mathf.Lerp(m_v, -1.0f, 0.5f);
+                m_h = Mathf.Lerp(m_h, Mathf.Cos(Time.time * 0.1f), 0.5f);
+            }
+            else
+            {
+                m_v = Mathf.Lerp(m_v, 0.0f, 0.5f);
+                m_h = Mathf.Lerp(m_h, 0.0f, 0.5f);
+            }
+
+            
         }
     }
 
     private void TraversePath()
     {
+        //Debug.Log("traversing path!");
+
         if (m_freshPath)
         {
             Vector3 toTar = m_curPath.corners[m_curCorner] - transform.position;
 
             Debug.DrawLine(transform.position, transform.position + toTar, Color.yellow);
 
-            if (toTar.magnitude < 2.0f)
+            if (toTar.magnitude < 0.5f)
             {
                 m_curCorner++;
 
@@ -213,6 +235,11 @@ public class AIControlInput : MonoBehaviour
                 toTar = transform.InverseTransformDirection(toTar);                
                 m_v = toTar.normalized.z;
                 m_h = toTar.normalized.x;
+
+                if (m_h > 0.7f || m_h < -0.7f)
+                {
+                    m_freshPath = false;
+                }
             }
         }
         else
