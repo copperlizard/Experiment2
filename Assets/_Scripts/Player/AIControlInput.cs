@@ -179,7 +179,7 @@ public class AIControlInput : MonoBehaviour
         }
         else
         {
-            Debug.Log("enemy too close!");
+            //Debug.Log("enemy too close!");
 
             if(toTar.magnitude < m_minRange - (m_minRange * 0.5f))
             {

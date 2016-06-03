@@ -142,7 +142,7 @@ public class OrbitCam : MonoBehaviour
             Debug.DrawLine(m_target.transform.position, m_interAt.point, Color.yellow, 0.01f, true);
 #endif      
 
-            target = m_interAt.point;
+            target = m_interAt.point + (m_interAt.normal * m_fudge);
         }
 
         return target;
